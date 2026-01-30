@@ -106,7 +106,7 @@ const App = {
             });
         }
 
-        document.getElementById('transcriptFile').addEventListener('change', (e) => {
+        document.getElementById('transcriptFile')?.addEventListener('change', (e) => {
             if (e.target.files.length > 0) {
                 this.handleTranscriptUpload(e.target.files[0]);
             }
@@ -120,17 +120,17 @@ const App = {
         });
 
         // API Key save button
-        document.getElementById('btnSaveApiKey').addEventListener('click', () => {
+        document.getElementById('btnSaveApiKey')?.addEventListener('click', () => {
             this.saveApiKey();
         });
 
         // Approve extraction button
-        document.getElementById('btnApproveExtraction').addEventListener('click', () => {
+        document.getElementById('btnApproveExtraction')?.addEventListener('click', () => {
             this.approveExtraction();
         });
 
         // Reject extraction button
-        document.getElementById('btnRejectExtraction').addEventListener('click', () => {
+        document.getElementById('btnRejectExtraction')?.addEventListener('click', () => {
             this.rejectExtraction();
         });
 
