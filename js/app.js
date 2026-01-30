@@ -229,7 +229,8 @@ const App = {
                     <h2>Client Profile</h2>
                 </div>
                 <div class="header-actions">
-                    <button class="btn btn-secondary" id="btnExportData">Export</button>
+                    <button class="btn btn-success" id="btnExportFactfind">Export Factfind</button>
+                    <button class="btn btn-secondary" id="btnExportData">Export JSON</button>
                     <button class="btn btn-danger" id="btnDeleteClient">Delete</button>
                 </div>
             </div>
@@ -288,6 +289,13 @@ const App = {
         // Export button
         document.getElementById('btnExportData')?.addEventListener('click', () => {
             this.exportClientData();
+        });
+
+        // Export Factfind button
+        document.getElementById('btnExportFactfind')?.addEventListener('click', () => {
+            if (this.currentClient) {
+                FactfindExport.exportForClient(this.currentClient);
+            }
         });
     },
 
@@ -1394,6 +1402,7 @@ const App = {
                 <div class="header-actions">
                     <button class="btn btn-primary" onclick="App.showModal('addClientModal')">+ Add Client</button>
                     <button class="btn btn-secondary" onclick="App.showBatchUploadView()">Batch Upload</button>
+                    <button class="btn btn-sm btn-secondary" onclick="FactfindExport.exportMappingDocument()">Field Mapping Doc</button>
                     <button class="btn btn-danger btn-sm" onclick="App.clearAllData()">Clear All Data</button>
                 </div>
             </div>
