@@ -224,7 +224,10 @@ const App = {
 
         mainContent.innerHTML = `
             <div class="content-header">
-                <h2>Client Profile</h2>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button class="btn btn-secondary btn-sm" onclick="App.showClientListView()">&#8592; Client List</button>
+                    <h2>Client Profile</h2>
+                </div>
                 <div class="header-actions">
                     <button class="btn btn-secondary" id="btnExportData">Export</button>
                     <button class="btn btn-danger" id="btnDeleteClient">Delete</button>
@@ -1333,6 +1336,86 @@ const App = {
         return parts.length > 0 ? parts.join(', ') : null;
     },
 
+    // Show client list view (main landing page)
+    showClientListView: async function() {
+        this.currentClientId = null;
+        this.currentClient = null;
+
+        // Clear active state in sidebar
+        document.querySelectorAll('.client-list-item').forEach(item => {
+            item.classList.remove('active');
+        });
+
+        const clients = await Database.getAllClients();
+        const mainContent = document.getElementById('mainContent');
+
+        if (clients.length === 0) {
+            this.showWelcome();
+            return;
+        }
+
+        const clientRows = clients.map(client => {
+            const name = `${client.personal.firstName || ''} ${client.personal.lastName || ''}`.trim() || 'Unnamed';
+            const initials = this.getInitials(name);
+            const completeness = client.dataCompleteness || 0;
+            let compClass = 'low';
+            if (completeness >= 70) compClass = 'high';
+            else if (completeness >= 40) compClass = 'medium';
+
+            const email = client.personal.email || 'No email';
+            const phone = client.personal.phoneMobile || 'No phone';
+            const employer = client.employment?.client?.employer || '';
+            const meetings = (client.dataSources || []).length;
+
+            return `
+                <div class="client-list-card" onclick="App.selectClient('${client.id}')">
+                    <div class="client-list-card-left">
+                        <div class="client-avatar" style="width:50px;height:50px;font-size:1.2rem;">${initials}</div>
+                        <div>
+                            <div class="client-list-card-name">${this.escapeHtml(name)}</div>
+                            <div class="client-list-card-meta">${this.escapeHtml(email)} | ${this.escapeHtml(phone)}</div>
+                            ${employer ? `<div class="client-list-card-meta">${this.escapeHtml(employer)}</div>` : ''}
+                        </div>
+                    </div>
+                    <div class="client-list-card-right">
+                        <div class="client-list-card-meetings">${meetings} meeting${meetings !== 1 ? 's' : ''}</div>
+                        <div class="completeness-bar" style="width:100px;">
+                            <div class="completeness-fill ${compClass}" style="width:${completeness}%"></div>
+                        </div>
+                        <span class="completeness-badge completeness-${compClass}">${completeness}%</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        mainContent.innerHTML = `
+            <div class="content-header">
+                <h2>Client List</h2>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="App.showModal('addClientModal')">+ Add Client</button>
+                    <button class="btn btn-secondary" onclick="App.showBatchUploadView()">Batch Upload</button>
+                    <button class="btn btn-danger btn-sm" onclick="App.clearAllData()">Clear All Data</button>
+                </div>
+            </div>
+            <div class="content-body">
+                <div class="client-list-grid">
+                    ${clientRows}
+                </div>
+            </div>
+        `;
+    },
+
+    // Clear all data
+    clearAllData: async function() {
+        if (!confirm('Are you sure you want to delete ALL client data? This cannot be undone.')) return;
+        if (!confirm('Really delete everything?')) return;
+
+        await Database.clearAllData();
+        await this.loadClientList();
+        this.showWelcome();
+        this.showAlert('All data cleared', 'success');
+    },
+
     // Show batch upload view
     showBatchUploadView: function() {
         this.currentClientId = null;
@@ -1346,7 +1429,10 @@ const App = {
         const mainContent = document.getElementById('mainContent');
         mainContent.innerHTML = `
             <div class="content-header">
-                <h2>Batch Transcript Upload</h2>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button class="btn btn-secondary btn-sm" onclick="App.showClientListView()">&#8592; Client List</button>
+                    <h2>Batch Transcript Upload</h2>
+                </div>
             </div>
             <div class="content-body">
                 <div class="card">
@@ -1409,6 +1495,13 @@ const App = {
         this.currentClientId = null;
         this.currentClient = null;
         await this.loadClientList();
+
+        // If there are clients, show client list view instead
+        const clients = await Database.getAllClients();
+        if (clients.length > 0) {
+            this.showClientListView();
+            return;
+        }
 
         document.getElementById('mainContent').innerHTML = `
             <div class="welcome-state">

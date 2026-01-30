@@ -988,3 +988,56 @@ body {
     color: var(--text-secondary);
     margin-bottom: 12px;
 }
+
+/* Client List Grid */
+.client-list-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.client-list-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.client-list-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-1px);
+}
+
+.client-list-card-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.client-list-card-name {
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 2px;
+}
+
+.client-list-card-meta {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.client-list-card-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.client-list-card-meetings {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
