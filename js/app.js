@@ -43,17 +43,23 @@ const App = {
         });
 
         // Batch upload button
-        document.getElementById('btnBatchUpload').addEventListener('click', () => {
-            this.showBatchUploadView();
-        });
+        const btnBatch = document.getElementById('btnBatchUpload');
+        if (btnBatch) {
+            btnBatch.addEventListener('click', () => {
+                this.showBatchUploadView();
+            });
+        }
 
         // Batch file input
-        document.getElementById('batchTranscriptFiles').addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                BatchProcessor.startBatch(e.target.files);
-                e.target.value = ''; // Reset
-            }
-        });
+        const batchInput = document.getElementById('batchTranscriptFiles');
+        if (batchInput) {
+            batchInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    BatchProcessor.startBatch(e.target.files);
+                    e.target.value = ''; // Reset
+                }
+            });
+        }
 
         // Modal close buttons
         document.querySelectorAll('.modal-close, .btn-cancel-modal').forEach(btn => {
