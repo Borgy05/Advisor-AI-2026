@@ -42,6 +42,19 @@ const App = {
             this.handleAddClient();
         });
 
+        // Batch upload button
+        document.getElementById('btnBatchUpload').addEventListener('click', () => {
+            this.showBatchUploadView();
+        });
+
+        // Batch file input
+        document.getElementById('batchTranscriptFiles').addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                BatchProcessor.startBatch(e.target.files);
+                e.target.value = ''; // Reset
+            }
+        });
+
         // Modal close buttons
         document.querySelectorAll('.modal-close, .btn-cancel-modal').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -1156,13 +1169,7 @@ const App = {
             await this.loadClientList();
 
             // Show welcome state
-            document.getElementById('mainContent').innerHTML = `
-                <div class="welcome-state">
-                    <h2>Welcome to Adviser AI</h2>
-                    <p>Select a client from the sidebar or add a new one to get started.</p>
-                    <button class="btn btn-primary" onclick="App.showModal('addClientModal')">Add Your First Client</button>
-                </div>
-            `;
+            this.showWelcome();
 
             this.showAlert('Client deleted', 'success');
 
@@ -1318,6 +1325,106 @@ const App = {
         ].filter(p => p);
 
         return parts.length > 0 ? parts.join(', ') : null;
+    },
+
+    // Show batch upload view
+    showBatchUploadView: function() {
+        this.currentClientId = null;
+        this.currentClient = null;
+
+        // Clear active state in sidebar
+        document.querySelectorAll('.client-list-item').forEach(item => {
+            item.classList.remove('active');
+        });
+
+        const mainContent = document.getElementById('mainContent');
+        mainContent.innerHTML = `
+            <div class="content-header">
+                <h2>Batch Transcript Upload</h2>
+            </div>
+            <div class="content-body">
+                <div class="card">
+                    <div class="card-header">Mass Upload Transcripts</div>
+                    <div class="card-body">
+                        <div class="upload-area" id="batchUploadArea">
+                            <div class="upload-icon">&#128218;</div>
+                            <h3>Drop multiple transcript files here</h3>
+                            <p>or click to browse (.txt files) - select multiple files</p>
+                            <p style="margin-top: 10px; font-size: 0.8rem; color: var(--text-secondary);">
+                                The AI will automatically identify clients, create records, and extract data from each transcript.
+                            </p>
+                        </div>
+
+                        <div class="alert alert-info" style="margin-top: 20px;">
+                            <strong>How it works:</strong>
+                            <ul style="margin: 10px 0 0 20px; font-size: 0.875rem;">
+                                <li>Upload multiple meeting transcript files at once</li>
+                                <li>AI identifies the client in each transcript automatically</li>
+                                <li>If a client already exists, you'll be asked to confirm before merging</li>
+                                <li>New clients are created automatically with extracted data</li>
+                                <li>Multiple meetings for the same client build up their profile over time</li>
+                                <li>Export individual client files when processing is complete</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Attach upload listeners
+        const batchUploadArea = document.getElementById('batchUploadArea');
+        batchUploadArea.addEventListener('click', () => {
+            document.getElementById('batchTranscriptFiles').click();
+        });
+
+        batchUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            batchUploadArea.classList.add('dragover');
+        });
+
+        batchUploadArea.addEventListener('dragleave', () => {
+            batchUploadArea.classList.remove('dragover');
+        });
+
+        batchUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            batchUploadArea.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.txt'));
+            if (files.length > 0) {
+                BatchProcessor.startBatch(files);
+            } else {
+                this.showAlert('Please drop .txt transcript files', 'warning');
+            }
+        });
+    },
+
+    // Show welcome state
+    showWelcome: async function() {
+        this.currentClientId = null;
+        this.currentClient = null;
+        await this.loadClientList();
+
+        document.getElementById('mainContent').innerHTML = `
+            <div class="welcome-state">
+                <h2>Welcome to Adviser AI</h2>
+                <p>Select a client from the sidebar or add a new one to get started.</p>
+                <div style="display: flex; gap: 12px;">
+                    <button class="btn btn-primary" onclick="App.showModal('addClientModal')">Add Client</button>
+                    <button class="btn btn-secondary" onclick="App.showBatchUploadView()">Batch Upload Transcripts</button>
+                </div>
+            </div>
+        `;
+    },
+
+    // Safe nested value getter
+    getNestedValueSafe: function(obj, path) {
+        const parts = path.replace(/\[(\d+)\]/g, '.$1').split('.');
+        let current = obj;
+        for (const part of parts) {
+            if (current === null || current === undefined) return undefined;
+            current = current[part];
+        }
+        return current;
     },
 
     // Helper: Render a data field
