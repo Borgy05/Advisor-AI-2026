@@ -65,7 +65,7 @@ const FactfindExport = {
 
             // 5. Find all tables in the document
             const ns = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
-            const tables = xmlDoc.getElementsByTagName('w:tbl');
+            const tables = xmlDoc.getElementsByTagNameNS(ns, 'tbl');
 
             // 6. Apply all mappings
             const allMappings = FactfindMapping.getAllMappings();
@@ -126,17 +126,17 @@ const FactfindExport = {
      */
     setCellText: function(table, rowIndex, colIndex, text, ns) {
         try {
-            const rows = table.getElementsByTagName('w:tr');
+            const rows = table.getElementsByTagNameNS(ns, 'tr');
             if (rowIndex >= rows.length) return false;
 
             const row = rows[rowIndex];
-            const cells = row.getElementsByTagName('w:tc');
+            const cells = row.getElementsByTagNameNS(ns, 'tc');
             if (colIndex >= cells.length) return false;
 
             const cell = cells[colIndex];
 
             // Find first paragraph in the cell
-            let para = cell.getElementsByTagName('w:p')[0];
+            let para = cell.getElementsByTagNameNS(ns, 'p')[0];
             if (!para) {
                 // Create paragraph if none exists
                 para = cell.ownerDocument.createElementNS(ns, 'w:p');
@@ -144,14 +144,14 @@ const FactfindExport = {
             }
 
             // Find or create a run (w:r) in the paragraph
-            let run = para.getElementsByTagName('w:r')[0];
+            let run = para.getElementsByTagNameNS(ns, 'r')[0];
             if (!run) {
                 run = cell.ownerDocument.createElementNS(ns, 'w:r');
 
                 // Copy run properties from existing runs in same table for consistency
-                const existingRuns = table.getElementsByTagName('w:r');
+                const existingRuns = table.getElementsByTagNameNS(ns, 'r');
                 if (existingRuns.length > 0) {
-                    const existingRpr = existingRuns[0].getElementsByTagName('w:rPr')[0];
+                    const existingRpr = existingRuns[0].getElementsByTagNameNS(ns, 'rPr')[0];
                     if (existingRpr) {
                         run.appendChild(existingRpr.cloneNode(true));
                     }
@@ -161,7 +161,7 @@ const FactfindExport = {
             }
 
             // Find or create text element (w:t)
-            let textEl = run.getElementsByTagName('w:t')[0];
+            let textEl = run.getElementsByTagNameNS(ns, 't')[0];
             if (!textEl) {
                 textEl = cell.ownerDocument.createElementNS(ns, 'w:t');
                 textEl.setAttribute('xml:space', 'preserve');
