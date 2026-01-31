@@ -425,13 +425,40 @@ const FactfindMapping = {
     // HELPER: Resolve a dot-notation path (with array indices) from client obj
     // =========================================================================
     resolveField: function(client, fieldPath) {
-        const parts = fieldPath.replace(/\[(\d+)\]/g, '.$1').split('.');
-        let current = client;
-        for (const part of parts) {
-            if (current === null || current === undefined) return null;
-            current = current[part];
+        const tryResolve = (path) => {
+            const parts = path.replace(/\[(\d+)\]/g, '.$1').split('.');
+            let current = client;
+            for (const part of parts) {
+                if (current === null || current === undefined) return null;
+                current = current[part];
+            }
+            return current;
+        };
+
+        // First try the original path
+        let value = tryResolve(fieldPath);
+        if (value !== null && value !== undefined) return value;
+
+        // Alias mappings to match current schema
+        const aliases = [
+            [/\bpersonal\.dob\b/g, 'personal.dateOfBirth'],
+            [/\bspouse\.dob\b/g, 'spouse.dateOfBirth'],
+            [/\bchildren\[(\d+)\]\.dob\b/g, 'children[$1].dateOfBirth'],
+            [/\bpersonal\.healthDetails\b/g, 'personal.healthStatus'],
+            [/\bspouse\.healthDetails\b/g, 'spouse.healthStatus'],
+            [/\bemployment\.client\./g, 'employment.'],
+            [/\bemployment\.spouse\./g, 'spouseEmployment.'],
+        ];
+
+        for (const [pattern, replacement] of aliases) {
+            const aliasPath = fieldPath.replace(pattern, replacement);
+            if (aliasPath !== fieldPath) {
+                value = tryResolve(aliasPath);
+                if (value !== null && value !== undefined) return value;
+            }
         }
-        return current;
+
+        return null;
     }
 };
 
