@@ -195,6 +195,10 @@ const FactfindExport = {
             const pdfDoc = await PDFDocument.create();
             const font = await pdfDoc.embedFont(StandardFonts.TimesRoman);
             const form = pdfDoc.getForm();
+            // Ensure PDF viewers render interactive fields
+            if (form.setNeedAppearances) {
+                form.setNeedAppearances(true);
+            }
 
             const PAGE_W = 595.28;
             const PAGE_H = 841.89;
