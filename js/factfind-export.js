@@ -154,18 +154,30 @@ const FactfindExport = {
     exportAsHtmlDoc: function(client) {
         try {
             const html = this.buildHtmlFactfind(client);
-            const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
-            const clientName = `${client.personal?.firstName || 'Unknown'}_${client.personal?.lastName || 'Client'}`.replace(/\s+/g, '_');
-            const fileName = `Factfind_${clientName}_${new Date().toISOString().split('T')[0]}.doc`;
+            const win = window.open('', '_blank');
+            if (win) {
+                win.document.open();
+                win.document.write(html);
+                win.document.close();
+                win.focus();
+                setTimeout(() => {
+                    win.print();
+                }, 300);
+                App.showAlert('Factfind opened for print/PDF', 'success');
+                return;
+            }
 
+            // Fallback to download if popup blocked
+            const blob = new Blob(['\ufeff', html], { type: 'text/html' });
+            const clientName = `${client.personal?.firstName || 'Unknown'}_${client.personal?.lastName || 'Client'}`.replace(/\s+/g, '_');
+            const fileName = `Factfind_${clientName}_${new Date().toISOString().split('T')[0]}.html`;
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
             a.download = fileName;
             a.click();
             URL.revokeObjectURL(url);
-
-            App.showAlert('Factfind exported (HTML Word)', 'success');
+            App.showAlert('Factfind downloaded (HTML)', 'success');
         } catch (error) {
             console.error('Factfind HTML export error:', error);
             App.showAlert('Factfind HTML export failed: ' + error.message, 'danger');
@@ -239,86 +251,303 @@ const FactfindExport = {
             </tr>
         `).join('');
 
+        const checkbox = (checked) => checked ? '&#x2611;' : '&#x2610;';
+        const relationship = (val, target) => String(val || '').toLowerCase() === target;
+        const currency = (val, cur) => {
+            if (val === null || val === undefined || val === '') return '';
+            const num = parseFloat(val);
+            if (isNaN(num)) return String(val);
+            const prefix = cur ? `${cur} ` : '';
+            return prefix + num.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        };
+
+        const childRow = (idx) => {
+            const c = (client.children || [])[idx] || {};
+            return `
+                <tr>
+                    <td>${fullName(c)}</td>
+                    <td>${formatDate(c.dateOfBirth)}</td>
+                    <td>${c.age ?? ''}</td>
+                    <td>${c.school || ''}</td>
+                    <td>${currency(c.annualSchoolFees, c.schoolFeesCurrency)}</td>
+                    <td>${c.relationship || ''}</td>
+                </tr>`;
+        };
+
+        const bankRow = (idx) => {
+            const b = (client.bankAccounts || [])[idx] || {};
+            return `
+                <tr>
+                    <td>${b.bank || ''}</td>
+                    <td>${currency(b.balance, b.currency)}</td>
+                    <td>${b.currency || ''}</td>
+                    <td>${b.interestRate || ''}</td>
+                </tr>`;
+        };
+
+        const investRow = (idx) => {
+            const i = (client.investments || [])[idx] || {};
+            return `
+                <tr>
+                    <td>${i.provider || ''}</td>
+                    <td>${currency(i.currentValue, i.currency)}</td>
+                    <td>${i.annualReturn || ''}</td>
+                    <td>${i.type || ''}</td>
+                </tr>`;
+        };
+
+        const pensionRow = (idx) => {
+            const p = (client.pensions || [])[idx] || {};
+            return `
+                <tr>
+                    <td>${p.provider || ''}</td>
+                    <td>${currency(p.currentValue, p.currency)}</td>
+                    <td>${p.type || ''}</td>
+                    <td>${p.notes || ''}</td>
+                </tr>`;
+        };
+
+        const propertyRow = (idx) => {
+            const pr = (client.properties || [])[idx] || {};
+            return `
+                <tr>
+                    <td>${formatAddress(pr.address)}</td>
+                    <td>${currency(pr.purchasePrice, pr.currency)}</td>
+                    <td>${currency(pr.currentValue, pr.currency)}</td>
+                    <td>${formatDate(pr.purchaseDate)}</td>
+                    <td>${currency(pr.mortgageBalance, pr.currency)}</td>
+                </tr>
+                <tr>
+                    <td>${currency(pr.monthlyPayment, pr.currency)}</td>
+                    <td>${currency(pr.rentalIncome, pr.currency)}</td>
+                    <td>${pr.mortgageProvider || ''}</td>
+                    <td>${pr.mortgageRate || ''}</td>
+                    <td>${formatDate(pr.mortgageEndDate)}</td>
+                </tr>`;
+        };
+
+        const debtRow = (idx) => {
+            const d = (client.debts || [])[idx] || {};
+            return `
+                <tr>
+                    <td>${d.provider || ''}</td>
+                    <td>${currency(d.outstandingBalance, d.currency)}</td>
+                    <td>${currency(d.monthlyPayment, d.currency)}</td>
+                    <td>${d.type || ''}</td>
+                </tr>`;
+        };
+
+        const protectionRow = (idx) => {
+            const pr = (client.protection || [])[idx] || {};
+            return `
+                <tr>
+                    <td>${pr.provider || ''}</td>
+                    <td>${pr.type || ''}</td>
+                    <td>${currency(pr.premium, pr.currency)}</td>
+                    <td>${pr.term || ''}</td>
+                    <td>${currency(pr.sumAssured, pr.currency)}</td>
+                </tr>`;
+        };
+
         return `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
   <title>Factfind</title>
   <style>
-    body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; color: #111; }
-    h1 { font-size: 18pt; margin: 0 0 10px 0; }
-    h2 { font-size: 13pt; margin: 16px 0 6px 0; }
+    body { font-family: "Times New Roman", serif; font-size: 10pt; color: #111; }
+    h1 { font-size: 14pt; color: #3b1b5a; margin: 0 0 6px 0; }
+    h2 { font-size: 11pt; margin: 12px 0 6px 0; color: #3b1b5a; }
+    .header-line { height: 2px; background: #6a4bc4; margin: 6px 0 10px 0; }
     table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
-    th, td { border: 1px solid #999; padding: 4px 6px; vertical-align: top; }
-    th { background: #f2f2f2; text-align: left; }
+    th, td { border: 1px solid #2c2c54; padding: 4px 6px; vertical-align: top; }
+    th { background: #3b1b5a; color: #fff; text-align: left; }
+    .label { background: #f1eaf7; color: #3b1b5a; }
     .muted { color: #555; }
+    .center { text-align: center; }
   </style>
 </head>
 <body>
   <h1>Financial Planning Questionnaire</h1>
-  <div class="muted">Exported: ${new Date().toLocaleString('en-GB')}</div>
+  <div class="header-line"></div>
 
   <h2>Personal Details</h2>
   <table>
-    <tr><th></th><th>Client</th><th>Spouse/Partner</th></tr>
-    <tr><td>Name</td><td>${fullName(p)}</td><td>${fullName(s)}</td></tr>
-    <tr><td>DOB</td><td>${formatDate(p.dateOfBirth)}</td><td>${formatDate(s.dateOfBirth)}</td></tr>
-    <tr><td>Age</td><td>${p.age ?? ''}</td><td>${s.age ?? ''}</td></tr>
-    <tr><td>Country of Residence</td><td>${p.countryOfResidence || ''}</td><td>${s.countryOfResidence || ''}</td></tr>
-    <tr><td>Nationality</td><td>${p.nationality || ''}</td><td>${s.nationality || ''}</td></tr>
-    <tr><td>Email</td><td>${p.email || ''}</td><td>${s.email || ''}</td></tr>
-    <tr><td>Phone (Home)</td><td>${p.phoneHome || ''}</td><td>${s.phoneHome || ''}</td></tr>
-    <tr><td>Phone (Mobile)</td><td>${p.phoneMobile || ''}</td><td>${s.phoneMobile || ''}</td></tr>
-    <tr><td>Address</td><td colspan="2">${formatAddress(p.address)}</td></tr>
+    <tr><th class="label"></th><th>Client</th><th>Spouse/Partner</th></tr>
+    <tr><td class="label">Name</td><td>${fullName(p)}</td><td>${fullName(s)}</td></tr>
+    <tr>
+      <td class="label">D.O.B./Age</td>
+      <td>${formatDate(p.dateOfBirth)} ${p.age ? ` / ${p.age}` : ''}</td>
+      <td>${formatDate(s.dateOfBirth)} ${s.age ? ` / ${s.age}` : ''}</td>
+    </tr>
+    <tr><td class="label">Country of Residence</td><td>${p.countryOfResidence || ''}</td><td>${s.countryOfResidence || ''}</td></tr>
+    <tr><td class="label">Nationality</td><td>${p.nationality || ''}</td><td>${s.nationality || ''}</td></tr>
+    <tr><td class="label">Dual Nationality</td><td>${p.dualNationality || ''}</td><td>${s.dualNationality || ''}</td></tr>
+    <tr><td class="label">Date of First Meeting</td><td>${p.firstMeetingDate || ''}</td><td>${s.firstMeetingDate || ''}</td></tr>
+    <tr><td class="label">Date FF Completed</td><td>${p.ffCompletedDate || ''}</td><td>${s.ffCompletedDate || ''}</td></tr>
+    <tr><td class="label">Email</td><td>${p.email || ''}</td><td>${s.email || ''}</td></tr>
+    <tr><td class="label">Telephone Number (Home)</td><td>${p.phoneHome || ''}</td><td>${s.phoneHome || ''}</td></tr>
+    <tr><td class="label">Telephone Number (Mobile)</td><td>${p.phoneMobile || ''}</td><td>${s.phoneMobile || ''}</td></tr>
+    <tr>
+      <td class="label">Relationship Status</td>
+      <td colspan="2">
+        ${checkbox(relationship(p.relationshipStatus, 'single'))} Single
+        ${checkbox(relationship(p.relationshipStatus, 'married'))} Married
+        ${checkbox(relationship(p.relationshipStatus, 'civil partner'))} Civil Partner
+        ${checkbox(relationship(p.relationshipStatus, 'divorced'))} Divorced
+        ${checkbox(relationship(p.relationshipStatus, 'widowed'))} Widowed
+      </td>
+    </tr>
+    <tr><td class="label">Address</td><td colspan="2">${formatAddress(p.address)}</td></tr>
   </table>
 
   <h2>Employment</h2>
   <table>
-    <tr><th></th><th>Client</th><th>Spouse/Partner</th></tr>
-    <tr><td>Status</td><td>${emp.status || ''}</td><td>${semp.status || ''}</td></tr>
-    <tr><td>Job Title</td><td>${emp.jobTitle || ''}</td><td>${semp.jobTitle || ''}</td></tr>
-    <tr><td>Employer</td><td>${emp.employer || ''}</td><td>${semp.employer || ''}</td></tr>
-    <tr><td>Monthly Gross Income</td><td>${formatCurrency(emp.monthlyGrossIncome)}</td><td>${formatCurrency(semp.monthlyGrossIncome)}</td></tr>
-    <tr><td>Retirement Age</td><td>${emp.retirementAge ?? ''}</td><td>${semp.retirementAge ?? ''}</td></tr>
+    <tr><th class="label">Job Title</th><th>Employer</th><th class="label">Job Title</th><th>Employer</th></tr>
+    <tr>
+      <td>${emp.jobTitle || ''}</td>
+      <td>${emp.employer || ''}</td>
+      <td>${semp.jobTitle || ''}</td>
+      <td>${semp.employer || ''}</td>
+    </tr>
+    <tr><th class="label">Monthly Income</th><th>Monthly Surplus</th><th class="label">Monthly Income</th><th>Monthly Surplus</th></tr>
+    <tr>
+      <td>${currency(emp.monthlyGrossIncome, emp.incomeCurrency)}</td>
+      <td>${currency(emp.monthlySurplus, emp.incomeCurrency)}</td>
+      <td>${currency(semp.monthlyGrossIncome, semp.incomeCurrency)}</td>
+      <td>${currency(semp.monthlySurplus, semp.incomeCurrency)}</td>
+    </tr>
+    <tr><th class="label">Bonus Dates</th><th>Bonus Amount</th><th class="label">Bonus Dates</th><th>Bonus Amount</th></tr>
+    <tr>
+      <td>${emp.bonusDates || ''}</td>
+      <td>${currency(emp.annualBonus, emp.incomeCurrency)}</td>
+      <td>${semp.bonusDates || ''}</td>
+      <td>${currency(semp.annualBonus, semp.incomeCurrency)}</td>
+    </tr>
+    <tr><th class="label">Employment History</th><th colspan="3">Employment History</th></tr>
+    <tr>
+      <td colspan="2">${emp.notes || ''}</td>
+      <td colspan="2">${semp.notes || ''}</td>
+    </tr>
   </table>
 
   <h2>Children / Dependants</h2>
   <table>
-    <tr><th>#</th><th>Name</th><th>DOB</th><th>Age</th><th>School</th><th>Annual Fees</th></tr>
-    ${childrenRows || '<tr><td colspan="6">None</td></tr>'}
+    <tr>
+      <th>Full Name</th><th>D.O.B.</th><th>Age</th><th>School/University</th><th>Annual Fees</th><th>Who Pays</th>
+    </tr>
+    ${childRow(0)}
+    ${childRow(1)}
+    ${childRow(2)}
+    ${childRow(3)}
+    ${childRow(4)}
+  </table>
+
+  <h2>Protection</h2>
+  <table>
+    <tr><th>Insurance Provider</th><th>Type</th><th>Premium</th><th>Term</th><th>Cover Amount</th></tr>
+    ${protectionRow(0)}
+    ${protectionRow(1)}
+    ${protectionRow(2)}
+    <tr>
+      <td colspan="5">
+        Smoker (Client): ${checkbox(p.smoker === true)} Yes ${checkbox(p.smoker === false)} No
+        &nbsp;&nbsp;Good Health: ${checkbox(p.healthStatus === 'good')} Yes ${checkbox(p.healthStatus === 'poor')} No
+      </td>
+    </tr>
+    <tr>
+      <td colspan="5">
+        Smoker (Spouse): ${checkbox(s.smoker === true)} Yes ${checkbox(s.smoker === false)} No
+        &nbsp;&nbsp;Good Health: ${checkbox(s.healthStatus === 'good')} Yes ${checkbox(s.healthStatus === 'poor')} No
+      </td>
+    </tr>
+  </table>
+
+  <h2>Bank Accounts</h2>
+  <table>
+    <tr><th>Bank</th><th>Value</th><th>Currency</th><th>Interest</th></tr>
+    ${bankRow(0)}
+    ${bankRow(1)}
+    ${bankRow(2)}
+    ${bankRow(3)}
+    ${bankRow(4)}
+    ${bankRow(5)}
+  </table>
+
+  <h2>Investments</h2>
+  <table>
+    <tr><th>Provider</th><th>Value</th><th>Return</th><th>Additional Info</th></tr>
+    ${investRow(0)}
+    ${investRow(1)}
+    ${investRow(2)}
+    ${investRow(3)}
+    ${investRow(4)}
+    ${investRow(5)}
   </table>
 
   <h2>Pensions</h2>
   <table>
-    <tr><th>#</th><th>Provider</th><th>Value</th><th>Type</th></tr>
-    ${pensionRows || '<tr><td colspan="4">None</td></tr>'}
+    <tr><th>Provider</th><th>Value</th><th>Type</th><th>Additional Info</th></tr>
+    ${pensionRow(0)}
+    ${pensionRow(1)}
+    ${pensionRow(2)}
+    ${pensionRow(3)}
+    ${pensionRow(4)}
+    ${pensionRow(5)}
   </table>
 
   <h2>Properties</h2>
   <table>
-    <tr><th>#</th><th>Location</th><th>Purchase Price</th><th>Current Value</th><th>Purchase Date</th><th>Mortgage Balance</th></tr>
-    ${propertyRows || '<tr><td colspan="6">None</td></tr>'}
+    <tr><th colspan="5">Property 1</th></tr>
+    ${propertyRow(0)}
+  </table>
+  <table>
+    <tr><th colspan="5">Property 2</th></tr>
+    ${propertyRow(1)}
+  </table>
+  <table>
+    <tr><th colspan="5">Property 3</th></tr>
+    ${propertyRow(2)}
+  </table>
+  <table>
+    <tr><th colspan="5">Property 4</th></tr>
+    ${propertyRow(3)}
+  </table>
+  <table>
+    <tr><th colspan="5">Property 5</th></tr>
+    ${propertyRow(4)}
   </table>
 
-  <h2>Goals & Risk</h2>
+  <h2>Debt</h2>
   <table>
-    <tr><td>Short Term Goals</td><td>${goals.shortTerm || ''}</td></tr>
-    <tr><td>Medium Term Goals</td><td>${goals.mediumTerm || ''}</td></tr>
-    <tr><td>Long Term Goals</td><td>${goals.longTerm || ''}</td></tr>
-    <tr><td>Retirement Age</td><td>${goals.retirementAge ?? ''}</td></tr>
-    <tr><td>Risk Tolerance</td><td>${risk.riskTolerance ?? ''}</td></tr>
+    <tr><th>Provider</th><th>Value</th><th>Repayments</th><th>Additional Information</th></tr>
+    ${debtRow(0)}
+    ${debtRow(1)}
+    ${debtRow(2)}
+    ${debtRow(3)}
   </table>
 
-  <h2>Expenditure (Monthly)</h2>
+  <h2>Estate Planning</h2>
   <table>
-    <tr><td>Mortgage / Rent</td><td>${formatCurrency(exp.mortgage)}</td></tr>
-    <tr><td>Loans / Credit Cards</td><td>${formatCurrency(exp.loans)}</td></tr>
-    <tr><td>Utilities</td><td>${formatCurrency(exp.utilities)}</td></tr>
-    <tr><td>Food</td><td>${formatCurrency(exp.food)}</td></tr>
-    <tr><td>Transport</td><td>${formatCurrency(exp.transport)}</td></tr>
-    <tr><td>Insurance</td><td>${formatCurrency(exp.insurance)}</td></tr>
-    <tr><td>Savings</td><td>${formatCurrency(exp.savings)}</td></tr>
-    <tr><td>Other</td><td>${formatCurrency(exp.other)}</td></tr>
+    <tr><th>Trust Details</th><th>Will Details</th></tr>
+    <tr><td>${client.estatePlanning?.trustDetails || ''}</td><td>${client.estatePlanning?.willLocation || ''}</td></tr>
+  </table>
+
+  <h2>Expenditure</h2>
+  <table>
+    <tr><th></th><th>Current Expenditure</th><th>Retirement Expenditure</th><th>On First Death</th><th>Is This Essential?</th></tr>
+    <tr><td>Mortgage / Rent</td><td>${currency(exp.mortgage, exp.currency)}</td><td></td><td></td><td></td></tr>
+    <tr><td>Loans / Credit Cards</td><td>${currency(exp.loans, exp.currency)}</td><td></td><td></td><td></td></tr>
+    <tr><td>Bills</td><td>${currency(exp.utilities, exp.currency)}</td><td></td><td></td><td></td></tr>
+    <tr><td>Food</td><td>${currency(exp.food, exp.currency)}</td><td></td><td></td><td></td></tr>
+    <tr><td>Car Costs</td><td>${currency(exp.transport, exp.currency)}</td><td></td><td></td><td></td></tr>
+    <tr><td>Holidays</td><td>${currency(exp.holidays, exp.currency)}</td><td></td><td></td><td></td></tr>
+    <tr><td>Insurance</td><td>${currency(exp.insurance, exp.currency)}</td><td></td><td></td><td></td></tr>
+    <tr><td>Savings Plan</td><td>${currency(exp.savings, exp.currency)}</td><td></td><td></td><td></td></tr>
+    <tr><td>School Fees</td><td>${currency(exp.schoolFees, exp.currency)}</td><td></td><td></td><td></td></tr>
+    <tr><td>Hobbies / Eating Out</td><td>${currency(exp.entertainment, exp.currency)}</td><td></td><td></td><td></td></tr>
+    <tr><td>Other</td><td>${currency(exp.other, exp.currency)}</td><td></td><td></td><td></td></tr>
+    <tr><td>Total</td><td>${currency(exp.totalMonthly, exp.currency)}</td><td></td><td></td><td></td></tr>
   </table>
 </body>
 </html>`;
