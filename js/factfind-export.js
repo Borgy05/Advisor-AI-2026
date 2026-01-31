@@ -184,6 +184,289 @@ const FactfindExport = {
         }
     },
 
+    /**
+     * Export a fillable PDF with editable fields
+     */
+    exportFillablePdf: async function(client) {
+        try {
+            if (!window.PDFLib) throw new Error('PDF library not loaded');
+            const { PDFDocument, StandardFonts, rgb } = window.PDFLib;
+
+            const pdfDoc = await PDFDocument.create();
+            const font = await pdfDoc.embedFont(StandardFonts.TimesRoman);
+            const form = pdfDoc.getForm();
+
+            const PAGE_W = 595.28;
+            const PAGE_H = 841.89;
+            const margin = 36;
+            const rowH = 18;
+
+            const addPageHeader = (page) => {
+                page.drawText('Financial Planning Questionnaire', {
+                    x: margin,
+                    y: PAGE_H - margin - 12,
+                    size: 12,
+                    font,
+                    color: rgb(0.23, 0.1, 0.35)
+                });
+                page.drawLine({
+                    start: { x: margin, y: PAGE_H - margin - 18 },
+                    end: { x: PAGE_W - margin, y: PAGE_H - margin - 18 },
+                    thickness: 1,
+                    color: rgb(0.42, 0.3, 0.77)
+                });
+            };
+
+            const addSectionTitle = (page, y, title) => {
+                page.drawRectangle({
+                    x: margin,
+                    y: y - 14,
+                    width: PAGE_W - margin * 2,
+                    height: 14,
+                    color: rgb(0.23, 0.1, 0.35)
+                });
+                page.drawText(title, { x: margin + 6, y: y - 11, size: 9, font, color: rgb(1, 1, 1) });
+                return y - 20;
+            };
+
+            const addTextField = (page, name, x, y, w, h, value) => {
+                const field = form.createTextField(name);
+                if (value !== null && value !== undefined && value !== '') {
+                    field.setText(String(value));
+                }
+                field.addToPage(page, {
+                    x,
+                    y,
+                    width: w,
+                    height: h,
+                    textColor: rgb(0, 0, 0),
+                    borderColor: rgb(0.2, 0.2, 0.3),
+                    borderWidth: 0.5,
+                    font
+                });
+            };
+
+            const addLabel = (page, text, x, y) => {
+                page.drawText(text, { x, y, size: 8.5, font, color: rgb(0.23, 0.1, 0.35) });
+            };
+
+            const p = client.personal || {};
+            const s = client.spouse || {};
+            const emp = client.employment || {};
+            const semp = client.spouseEmployment || {};
+            const exp = client.expenditure || {};
+            const goals = client.goals || {};
+            const risk = client.riskAttitude || {};
+
+            const fullName = (person) => {
+                if (!person) return '';
+                const first = person.preferredName || person.firstName || '';
+                const last = person.lastName || '';
+                return `${first} ${last}`.trim();
+            };
+
+            const formatDate = (val) => {
+                if (!val) return '';
+                const d = new Date(val);
+                if (isNaN(d)) return String(val);
+                return d.toLocaleDateString('en-GB');
+            };
+
+            const currency = (val, cur) => {
+                if (val === null || val === undefined || val === '') return '';
+                const num = parseFloat(val);
+                if (isNaN(num)) return String(val);
+                const prefix = cur ? `${cur} ` : '';
+                return prefix + num.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            };
+
+            const addr = (a) => a ? [a.line1, a.line2, a.city, a.state, a.postcode, a.country].filter(Boolean).join(', ') : '';
+
+            // Page 1
+            let page = pdfDoc.addPage([PAGE_W, PAGE_H]);
+            addPageHeader(page);
+            let y = PAGE_H - margin - 30;
+
+            y = addSectionTitle(page, y, 'Personal Details');
+            addLabel(page, 'Client', margin + 140, y + 2);
+            addLabel(page, 'Spouse/Partner', margin + 330, y + 2);
+            y -= rowH;
+
+            const twoColRow = (label, cVal, sVal, nameC, nameS) => {
+                addLabel(page, label, margin, y + 4);
+                addTextField(page, nameC, margin + 120, y, 180, 14, cVal);
+                addTextField(page, nameS, margin + 310, y, 180, 14, sVal);
+                y -= rowH;
+            };
+
+            twoColRow('Name', fullName(p), fullName(s), 'personal.name', 'spouse.name');
+            twoColRow('D.O.B.', formatDate(p.dateOfBirth), formatDate(s.dateOfBirth), 'personal.dob', 'spouse.dob');
+            twoColRow('Age', p.age ?? '', s.age ?? '', 'personal.age', 'spouse.age');
+            twoColRow('Country of Residence', p.countryOfResidence || '', s.countryOfResidence || '', 'personal.country', 'spouse.country');
+            twoColRow('Nationality', p.nationality || '', s.nationality || '', 'personal.nationality', 'spouse.nationality');
+            twoColRow('Dual Nationality', p.dualNationality || '', s.dualNationality || '', 'personal.dualNationality', 'spouse.dualNationality');
+            twoColRow('Email', p.email || '', s.email || '', 'personal.email', 'spouse.email');
+            twoColRow('Telephone (Home)', p.phoneHome || '', s.phoneHome || '', 'personal.phoneHome', 'spouse.phoneHome');
+            twoColRow('Telephone (Mobile)', p.phoneMobile || '', s.phoneMobile || '', 'personal.phoneMobile', 'spouse.phoneMobile');
+            addLabel(page, 'Address', margin, y + 4);
+            addTextField(page, 'personal.address', margin + 120, y, 370, 28, addr(p.address));
+            y -= rowH + 12;
+
+            y = addSectionTitle(page, y, 'Employment Information');
+            addLabel(page, 'Client', margin + 120, y + 2);
+            addLabel(page, 'Spouse/Partner', margin + 320, y + 2);
+            y -= rowH;
+            twoColRow('Job Title', emp.jobTitle || '', semp.jobTitle || '', 'employment.jobTitle', 'spouseEmployment.jobTitle');
+            twoColRow('Employer', emp.employer || '', semp.employer || '', 'employment.employer', 'spouseEmployment.employer');
+            twoColRow('Monthly Income', currency(emp.monthlyGrossIncome, emp.incomeCurrency), currency(semp.monthlyGrossIncome, semp.incomeCurrency), 'employment.monthlyGrossIncome', 'spouseEmployment.monthlyGrossIncome');
+            twoColRow('Monthly Surplus', currency(emp.monthlySurplus, emp.incomeCurrency), currency(semp.monthlySurplus, semp.incomeCurrency), 'employment.monthlySurplus', 'spouseEmployment.monthlySurplus');
+            twoColRow('Bonus Amount', currency(emp.annualBonus, emp.incomeCurrency), currency(semp.annualBonus, semp.incomeCurrency), 'employment.annualBonus', 'spouseEmployment.annualBonus');
+
+            // Page 2
+            page = pdfDoc.addPage([PAGE_W, PAGE_H]);
+            addPageHeader(page);
+            y = PAGE_H - margin - 30;
+
+            y = addSectionTitle(page, y, 'Bank Accounts');
+            addLabel(page, 'Bank', margin, y + 4);
+            addLabel(page, 'Value', margin + 200, y + 4);
+            addLabel(page, 'Currency', margin + 300, y + 4);
+            addLabel(page, 'Interest', margin + 380, y + 4);
+            y -= rowH;
+            for (let i = 0; i < 6; i++) {
+                const b = (client.bankAccounts || [])[i] || {};
+                addTextField(page, `bankAccounts[${i}].bank`, margin, y, 180, 14, b.bank || '');
+                addTextField(page, `bankAccounts[${i}].balance`, margin + 200, y, 90, 14, currency(b.balance, b.currency));
+                addTextField(page, `bankAccounts[${i}].currency`, margin + 300, y, 70, 14, b.currency || '');
+                addTextField(page, `bankAccounts[${i}].interestRate`, margin + 380, y, 110, 14, b.interestRate || '');
+                y -= rowH;
+            }
+
+            y = addSectionTitle(page, y, 'Investments');
+            addLabel(page, 'Provider', margin, y + 4);
+            addLabel(page, 'Value', margin + 200, y + 4);
+            addLabel(page, 'Return', margin + 300, y + 4);
+            addLabel(page, 'Additional Info', margin + 380, y + 4);
+            y -= rowH;
+            for (let i = 0; i < 6; i++) {
+                const inv = (client.investments || [])[i] || {};
+                addTextField(page, `investments[${i}].provider`, margin, y, 180, 14, inv.provider || '');
+                addTextField(page, `investments[${i}].currentValue`, margin + 200, y, 90, 14, currency(inv.currentValue, inv.currency));
+                addTextField(page, `investments[${i}].annualReturn`, margin + 300, y, 70, 14, inv.annualReturn || '');
+                addTextField(page, `investments[${i}].type`, margin + 380, y, 110, 14, inv.type || '');
+                y -= rowH;
+            }
+
+            y = addSectionTitle(page, y, 'Pensions');
+            addLabel(page, 'Provider', margin, y + 4);
+            addLabel(page, 'Value', margin + 200, y + 4);
+            addLabel(page, 'Type', margin + 300, y + 4);
+            addLabel(page, 'Additional Info', margin + 380, y + 4);
+            y -= rowH;
+            for (let i = 0; i < 6; i++) {
+                const pen = (client.pensions || [])[i] || {};
+                addTextField(page, `pensions[${i}].provider`, margin, y, 180, 14, pen.provider || '');
+                addTextField(page, `pensions[${i}].currentValue`, margin + 200, y, 90, 14, currency(pen.currentValue, pen.currency));
+                addTextField(page, `pensions[${i}].type`, margin + 300, y, 70, 14, pen.type || '');
+                addTextField(page, `pensions[${i}].notes`, margin + 380, y, 110, 14, pen.notes || '');
+                y -= rowH;
+            }
+
+            // Page 3
+            page = pdfDoc.addPage([PAGE_W, PAGE_H]);
+            addPageHeader(page);
+            y = PAGE_H - margin - 30;
+
+            y = addSectionTitle(page, y, 'Properties');
+            for (let i = 0; i < 5; i++) {
+                const pr = (client.properties || [])[i] || {};
+                addLabel(page, `Location ${i + 1}`, margin, y + 4);
+                addTextField(page, `properties[${i}].address`, margin + 120, y, 370, 14, addr(pr.address));
+                y -= rowH;
+                addTextField(page, `properties[${i}].purchasePrice`, margin, y, 110, 14, currency(pr.purchasePrice, pr.currency));
+                addTextField(page, `properties[${i}].currentValue`, margin + 120, y, 110, 14, currency(pr.currentValue, pr.currency));
+                addTextField(page, `properties[${i}].purchaseDate`, margin + 240, y, 110, 14, formatDate(pr.purchaseDate));
+                addTextField(page, `properties[${i}].mortgageBalance`, margin + 360, y, 110, 14, currency(pr.mortgageBalance, pr.currency));
+                y -= rowH;
+            }
+
+            y = addSectionTitle(page, y, 'Debt');
+            addLabel(page, 'Provider', margin, y + 4);
+            addLabel(page, 'Value', margin + 200, y + 4);
+            addLabel(page, 'Repayments', margin + 300, y + 4);
+            addLabel(page, 'Additional Info', margin + 380, y + 4);
+            y -= rowH;
+            for (let i = 0; i < 4; i++) {
+                const d = (client.debts || [])[i] || {};
+                addTextField(page, `debts[${i}].provider`, margin, y, 180, 14, d.provider || '');
+                addTextField(page, `debts[${i}].outstandingBalance`, margin + 200, y, 90, 14, currency(d.outstandingBalance, d.currency));
+                addTextField(page, `debts[${i}].monthlyPayment`, margin + 300, y, 70, 14, currency(d.monthlyPayment, d.currency));
+                addTextField(page, `debts[${i}].type`, margin + 380, y, 110, 14, d.type || '');
+                y -= rowH;
+            }
+
+            y = addSectionTitle(page, y, 'Estate Planning');
+            addLabel(page, 'Trust Details', margin, y + 4);
+            addTextField(page, 'estatePlanning.trustDetails', margin + 120, y, 370, 28, client.estatePlanning?.trustDetails || '');
+            y -= rowH + 12;
+            addLabel(page, 'Will Details', margin, y + 4);
+            addTextField(page, 'estatePlanning.willLocation', margin + 120, y, 370, 28, client.estatePlanning?.willLocation || '');
+            y -= rowH + 12;
+
+            y = addSectionTitle(page, y, 'Expenditure');
+            const expRow = (label, value, name) => {
+                addLabel(page, label, margin, y + 4);
+                addTextField(page, name, margin + 200, y, 120, 14, currency(value, exp.currency));
+                y -= rowH;
+            };
+            expRow('Mortgage / Rent', exp.mortgage ?? exp.rent, 'expenditure.mortgage');
+            expRow('Loans / Credit Cards', exp.loans, 'expenditure.loans');
+            expRow('Bills', exp.utilities, 'expenditure.utilities');
+            expRow('Food', exp.food, 'expenditure.food');
+            expRow('Car Costs', exp.transport, 'expenditure.transport');
+            expRow('Holidays', exp.holidays, 'expenditure.holidays');
+            expRow('Insurance', exp.insurance, 'expenditure.insurance');
+            expRow('Savings Plan', exp.savings, 'expenditure.savings');
+            expRow('School Fees', exp.schoolFees, 'expenditure.schoolFees');
+            expRow('Hobbies / Eating Out', exp.entertainment, 'expenditure.entertainment');
+            expRow('Other', exp.other, 'expenditure.other');
+            expRow('Total', exp.totalMonthly, 'expenditure.totalMonthly');
+
+            y = addSectionTitle(page, y, 'Goals & Risk');
+            addLabel(page, 'Short Term Goals', margin, y + 4);
+            addTextField(page, 'goals.shortTerm', margin + 200, y, 280, 28, goals.shortTerm || '');
+            y -= rowH + 12;
+            addLabel(page, 'Medium Term Goals', margin, y + 4);
+            addTextField(page, 'goals.mediumTerm', margin + 200, y, 280, 28, goals.mediumTerm || '');
+            y -= rowH + 12;
+            addLabel(page, 'Long Term Goals', margin, y + 4);
+            addTextField(page, 'goals.longTerm', margin + 200, y, 280, 28, goals.longTerm || '');
+            y -= rowH + 12;
+            addLabel(page, 'Retirement Age', margin, y + 4);
+            addTextField(page, 'goals.retirementAge', margin + 200, y, 80, 14, goals.retirementAge ?? '');
+            addLabel(page, 'Risk Tolerance', margin + 300, y + 4);
+            addTextField(page, 'riskAttitude.riskTolerance', margin + 400, y, 80, 14, risk.riskTolerance ?? '');
+
+            form.updateFieldAppearances(font);
+
+            const pdfBytes = await pdfDoc.save();
+            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+            const clientName = `${p.firstName || 'Unknown'}_${p.lastName || 'Client'}`.replace(/\s+/g, '_');
+            const fileName = `Factfind_${clientName}_${new Date().toISOString().split('T')[0]}.pdf`;
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            App.showAlert('Fillable PDF exported', 'success');
+        } catch (error) {
+            console.error('Fillable PDF export error:', error);
+            App.showAlert('Fillable PDF export failed: ' + error.message, 'danger');
+        }
+    },
+
     buildHtmlFactfind: function(client) {
         const formatDate = (val) => {
             if (!val) return '';

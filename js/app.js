@@ -231,6 +231,7 @@ const App = {
                 </div>
                 <div class="header-actions">
                     <button class="btn btn-success" id="btnExportFactfind">Export Factfind</button>
+                    <button class="btn btn-secondary" id="btnExportPdf">Export Fillable PDF</button>
                     <button class="btn btn-secondary" id="btnExportData">Export JSON</button>
                     <button class="btn btn-danger" id="btnDeleteClient">Delete</button>
                 </div>
@@ -297,6 +298,13 @@ const App = {
             if (this.currentClient) {
                 // Use HTML-based export (Word-compatible) to avoid template mapping issues
                 FactfindExport.exportAsHtmlDoc(this.currentClient);
+            }
+        });
+
+        // Export Fillable PDF button
+        document.getElementById('btnExportPdf')?.addEventListener('click', () => {
+            if (this.currentClient) {
+                FactfindExport.exportFillablePdf(this.currentClient);
             }
         });
     },
