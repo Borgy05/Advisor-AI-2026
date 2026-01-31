@@ -20,134 +20,154 @@ const FactfindMapping = {
 
     // =========================================================================
     // TABLE 0: Personal Details (Client & Spouse)
-    // 14 rows x 13 cols — Client fills cols 1-6, Spouse fills cols 7-12
+    // Layout: 3 columns (Client/Spouse) with special DOB/Age row
     // =========================================================================
     personalDetails: [
-        // Client
-        { table: 0, row: 1,  col: 1,  field: 'personal.firstName',           label: 'Client First Name' },
-        { table: 0, row: 1,  col: 3,  field: 'personal.lastName',            label: 'Client Last Name' },
-        { table: 0, row: 2,  col: 1,  field: 'personal.dob',                 label: 'Client DOB', format: 'date' },
-        { table: 0, row: 2,  col: 4,  field: 'personal.age',                 label: 'Client Age' },
-        { table: 0, row: 3,  col: 1,  field: 'personal.countryOfResidence',  label: 'Client Country of Residence' },
-        { table: 0, row: 4,  col: 1,  field: 'personal.nationality',         label: 'Client Nationality' },
-        { table: 0, row: 5,  col: 1,  field: 'personal.dualNationality',     label: 'Client Dual Nationality' },
-        { table: 0, row: 8,  col: 1,  field: 'personal.email',               label: 'Client Email' },
-        { table: 0, row: 9,  col: 1,  field: 'personal.phoneHome',           label: 'Client Phone (Home)' },
-        { table: 0, row: 10, col: 1,  field: 'personal.phoneMobile',         label: 'Client Phone (Mobile)' },
-        { table: 0, row: 12, col: 1,  field: 'personal.address.line1',       label: 'Client Address' },
+        // Names (row 1)
+        { table: 0, row: 1, col: 1, field: 'personal', label: 'Client Name', format: 'fullName' },
+        { table: 0, row: 1, col: 2, field: 'spouse',   label: 'Spouse Name', format: 'fullName' },
 
-        // Spouse/Partner
-        { table: 0, row: 1,  col: 7,  field: 'spouse.firstName',             label: 'Spouse First Name' },
-        { table: 0, row: 1,  col: 9,  field: 'spouse.lastName',              label: 'Spouse Last Name' },
-        { table: 0, row: 2,  col: 7,  field: 'spouse.dob',                   label: 'Spouse DOB', format: 'date' },
-        { table: 0, row: 2,  col: 10, field: 'spouse.age',                   label: 'Spouse Age' },
-        { table: 0, row: 3,  col: 7,  field: 'spouse.countryOfResidence',    label: 'Spouse Country of Residence' },
-        { table: 0, row: 4,  col: 7,  field: 'spouse.nationality',           label: 'Spouse Nationality' },
-        { table: 0, row: 5,  col: 7,  field: 'spouse.dualNationality',       label: 'Spouse Dual Nationality' },
-        { table: 0, row: 8,  col: 7,  field: 'spouse.email',                 label: 'Spouse Email' },
-        { table: 0, row: 9,  col: 7,  field: 'spouse.phoneHome',             label: 'Spouse Phone (Home)' },
-        { table: 0, row: 10, col: 7,  field: 'spouse.phoneMobile',           label: 'Spouse Phone (Mobile)' },
-        { table: 0, row: 12, col: 7,  field: 'spouse.address.line1',         label: 'Spouse Address' },
+        // DOB / Age (row 2: 5 cols)
+        { table: 0, row: 2, col: 1, field: 'personal.dateOfBirth', label: 'Client DOB', format: 'date' },
+        { table: 0, row: 2, col: 2, field: 'personal.age',         label: 'Client Age' },
+        { table: 0, row: 2, col: 3, field: 'spouse.dateOfBirth',   label: 'Spouse DOB', format: 'date' },
+        { table: 0, row: 2, col: 4, field: 'spouse.age',           label: 'Spouse Age' },
+
+        // Country / Nationality / Dual Nationality
+        { table: 0, row: 3, col: 1, field: 'personal.countryOfResidence', label: 'Client Country of Residence' },
+        { table: 0, row: 3, col: 2, field: 'spouse.countryOfResidence',   label: 'Spouse Country of Residence' },
+        { table: 0, row: 4, col: 1, field: 'personal.nationality',        label: 'Client Nationality' },
+        { table: 0, row: 4, col: 2, field: 'spouse.nationality',          label: 'Spouse Nationality' },
+        { table: 0, row: 5, col: 1, field: 'personal.dualNationality',    label: 'Client Dual Nationality' },
+        { table: 0, row: 5, col: 2, field: 'spouse.dualNationality',      label: 'Spouse Dual Nationality' },
+
+        // Email / Phones
+        { table: 0, row: 8,  col: 1, field: 'personal.email',      label: 'Client Email' },
+        { table: 0, row: 8,  col: 2, field: 'spouse.email',        label: 'Spouse Email' },
+        { table: 0, row: 9,  col: 1, field: 'personal.phoneHome',  label: 'Client Phone (Home)' },
+        { table: 0, row: 9,  col: 2, field: 'spouse.phoneHome',    label: 'Spouse Phone (Home)' },
+        { table: 0, row: 10, col: 1, field: 'personal.phoneMobile', label: 'Client Phone (Mobile)' },
+        { table: 0, row: 10, col: 2, field: 'spouse.phoneMobile',   label: 'Spouse Phone (Mobile)' },
+
+        // Address (row 12 has 2 cols)
+        { table: 0, row: 12, col: 1, field: 'personal.address', label: 'Client Address', format: 'address' },
 
         // Relationship status checkboxes (row 11)
-        // Single=col1, Married=col3, Civil Partner=col5, Divorced=col9, Widowed=col11
-        { table: 0, row: 11, col: 1,  field: 'personal.relationshipStatus',  label: 'Relationship Status', format: 'checkboxSingle' },
-        { table: 0, row: 11, col: 3,  field: 'personal.relationshipStatus',  label: 'Relationship Status', format: 'checkboxMarried' },
-        { table: 0, row: 11, col: 6,  field: 'personal.relationshipStatus',  label: 'Relationship Status', format: 'checkboxCivilPartner' },
-        { table: 0, row: 11, col: 9,  field: 'personal.relationshipStatus',  label: 'Relationship Status', format: 'checkboxDivorced' },
-        { table: 0, row: 11, col: 11, field: 'personal.relationshipStatus',  label: 'Relationship Status', format: 'checkboxWidowed' },
+        // Checkbox cells appear after each label (col 2,4,6,8,10)
+        { table: 0, row: 11, col: 2,  field: 'personal.relationshipStatus', label: 'Relationship Status', format: 'checkboxSingle' },
+        { table: 0, row: 11, col: 4,  field: 'personal.relationshipStatus', label: 'Relationship Status', format: 'checkboxMarried' },
+        { table: 0, row: 11, col: 6,  field: 'personal.relationshipStatus', label: 'Relationship Status', format: 'checkboxCivilPartner' },
+        { table: 0, row: 11, col: 8,  field: 'personal.relationshipStatus', label: 'Relationship Status', format: 'checkboxDivorced' },
+        { table: 0, row: 11, col: 10, field: 'personal.relationshipStatus', label: 'Relationship Status', format: 'checkboxWidowed' },
     ],
 
     // =========================================================================
     // TABLE 3: Employment Information
-    // 13 rows x 11 cols
     // =========================================================================
     employment: [
-        // Client employment (left side)
-        { table: 3, row: 2,  col: 0,  field: 'employment.client.jobTitle',           label: 'Client Job Title' },
-        { table: 3, row: 2,  col: 4,  field: 'employment.client.employer',           label: 'Client Employer' },
-        { table: 3, row: 4,  col: 0,  field: 'employment.client.monthlyGrossIncome', label: 'Client Monthly Income', format: 'currency' },
-        { table: 3, row: 4,  col: 4,  field: 'employment.client.monthlySurplus',     label: 'Client Monthly Surplus', format: 'currency' },
-        { table: 3, row: 6,  col: 4,  field: 'employment.client.annualBonus',        label: 'Client Bonus Amount', format: 'currency' },
-        { table: 3, row: 8,  col: 0,  field: 'employment.client.employmentHistory',  label: 'Client Employment History' },
+        // Row 2 (Job title / Employer)
+        { table: 3, row: 2, col: 0, field: 'employment.jobTitle',        label: 'Client Job Title' },
+        { table: 3, row: 2, col: 1, field: 'employment.employer',        label: 'Client Employer' },
+        { table: 3, row: 2, col: 2, field: 'spouseEmployment.jobTitle',  label: 'Spouse Job Title' },
+        { table: 3, row: 2, col: 3, field: 'spouseEmployment.employer',  label: 'Spouse Employer' },
 
-        // Spouse employment (right side)
-        { table: 3, row: 2,  col: 7,  field: 'employment.spouse.jobTitle',           label: 'Spouse Job Title' },
-        { table: 3, row: 2,  col: 8,  field: 'employment.spouse.employer',           label: 'Spouse Employer' },
-        { table: 3, row: 4,  col: 7,  field: 'employment.spouse.monthlyGrossIncome', label: 'Spouse Monthly Income', format: 'currency' },
-        { table: 3, row: 4,  col: 8,  field: 'employment.spouse.monthlySurplus',     label: 'Spouse Monthly Surplus', format: 'currency' },
-        { table: 3, row: 6,  col: 8,  field: 'employment.spouse.annualBonus',        label: 'Spouse Bonus Amount', format: 'currency' },
+        // Row 4 (Monthly income / surplus)
+        { table: 3, row: 4, col: 0, field: 'employment.monthlyGrossIncome',       label: 'Client Monthly Income', format: 'currency' },
+        { table: 3, row: 4, col: 1, field: 'employment.monthlySurplus',           label: 'Client Monthly Surplus', format: 'currency' },
+        { table: 3, row: 4, col: 2, field: 'spouseEmployment.monthlyGrossIncome', label: 'Spouse Monthly Income', format: 'currency' },
+        { table: 3, row: 4, col: 3, field: 'spouseEmployment.monthlySurplus',     label: 'Spouse Monthly Surplus', format: 'currency' },
+
+        // Row 6 (Bonus amount)
+        { table: 3, row: 6, col: 1, field: 'employment.annualBonus',       label: 'Client Bonus Amount', format: 'currency' },
+        { table: 3, row: 6, col: 3, field: 'spouseEmployment.annualBonus', label: 'Spouse Bonus Amount', format: 'currency' },
+
+        // Row 8 (Employment history)
+        { table: 3, row: 8, col: 0, field: 'employment.notes',       label: 'Client Employment History' },
+        { table: 3, row: 8, col: 1, field: 'spouseEmployment.notes', label: 'Spouse Employment History' },
+
+        // Row 10 (Additional benefits)
+        { table: 3, row: 10, col: 1, field: 'employment.otherBenefits', label: 'Additional Benefits' },
     ],
 
     // =========================================================================
     // TABLE 4: Children / Dependants
-    // 8 rows x 9 cols — Up to 5 children (rows 2-6)
     // =========================================================================
     children: [
         // Child 1
-        { table: 4, row: 2, col: 0, field: 'children[0].firstName',       label: 'Child 1 Name', format: 'childName' },
-        { table: 4, row: 2, col: 1, field: 'children[0].dob',             label: 'Child 1 DOB', format: 'date' },
-        { table: 4, row: 2, col: 2, field: 'children[0].age',             label: 'Child 1 Age' },
-        { table: 4, row: 2, col: 3, field: 'children[0].school',          label: 'Child 1 School' },
-        { table: 4, row: 2, col: 7, field: 'children[0].annualSchoolFees', label: 'Child 1 Annual Fees', format: 'currency' },
+        { table: 4, row: 2, col: 0, field: 'children[0]',          label: 'Child 1 Name', format: 'childFullName' },
+        { table: 4, row: 2, col: 1, field: 'children[0].dateOfBirth', label: 'Child 1 DOB', format: 'date' },
+        { table: 4, row: 2, col: 2, field: 'children[0].age',      label: 'Child 1 Age' },
+        { table: 4, row: 2, col: 3, field: 'children[0].school',   label: 'Child 1 School' },
+        { table: 4, row: 2, col: 4, field: 'children[0].annualSchoolFees', label: 'Child 1 Annual Fees', format: 'currency' },
+
         // Child 2
-        { table: 4, row: 3, col: 0, field: 'children[1].firstName',       label: 'Child 2 Name', format: 'childName' },
-        { table: 4, row: 3, col: 1, field: 'children[1].dob',             label: 'Child 2 DOB', format: 'date' },
-        { table: 4, row: 3, col: 2, field: 'children[1].age',             label: 'Child 2 Age' },
-        { table: 4, row: 3, col: 3, field: 'children[1].school',          label: 'Child 2 School' },
-        { table: 4, row: 3, col: 7, field: 'children[1].annualSchoolFees', label: 'Child 2 Annual Fees', format: 'currency' },
+        { table: 4, row: 3, col: 0, field: 'children[1]',          label: 'Child 2 Name', format: 'childFullName' },
+        { table: 4, row: 3, col: 1, field: 'children[1].dateOfBirth', label: 'Child 2 DOB', format: 'date' },
+        { table: 4, row: 3, col: 2, field: 'children[1].age',      label: 'Child 2 Age' },
+        { table: 4, row: 3, col: 3, field: 'children[1].school',   label: 'Child 2 School' },
+        { table: 4, row: 3, col: 4, field: 'children[1].annualSchoolFees', label: 'Child 2 Annual Fees', format: 'currency' },
+
         // Child 3
-        { table: 4, row: 4, col: 0, field: 'children[2].firstName',       label: 'Child 3 Name', format: 'childName' },
-        { table: 4, row: 4, col: 1, field: 'children[2].dob',             label: 'Child 3 DOB', format: 'date' },
-        { table: 4, row: 4, col: 2, field: 'children[2].age',             label: 'Child 3 Age' },
-        { table: 4, row: 4, col: 3, field: 'children[2].school',          label: 'Child 3 School' },
-        { table: 4, row: 4, col: 7, field: 'children[2].annualSchoolFees', label: 'Child 3 Annual Fees', format: 'currency' },
+        { table: 4, row: 4, col: 0, field: 'children[2]',          label: 'Child 3 Name', format: 'childFullName' },
+        { table: 4, row: 4, col: 1, field: 'children[2].dateOfBirth', label: 'Child 3 DOB', format: 'date' },
+        { table: 4, row: 4, col: 2, field: 'children[2].age',      label: 'Child 3 Age' },
+        { table: 4, row: 4, col: 3, field: 'children[2].school',   label: 'Child 3 School' },
+        { table: 4, row: 4, col: 4, field: 'children[2].annualSchoolFees', label: 'Child 3 Annual Fees', format: 'currency' },
+
         // Child 4
-        { table: 4, row: 5, col: 0, field: 'children[3].firstName',       label: 'Child 4 Name', format: 'childName' },
-        { table: 4, row: 5, col: 1, field: 'children[3].dob',             label: 'Child 4 DOB', format: 'date' },
-        { table: 4, row: 5, col: 2, field: 'children[3].age',             label: 'Child 4 Age' },
-        { table: 4, row: 5, col: 3, field: 'children[3].school',          label: 'Child 4 School' },
-        { table: 4, row: 5, col: 7, field: 'children[3].annualSchoolFees', label: 'Child 4 Annual Fees', format: 'currency' },
+        { table: 4, row: 5, col: 0, field: 'children[3]',          label: 'Child 4 Name', format: 'childFullName' },
+        { table: 4, row: 5, col: 1, field: 'children[3].dateOfBirth', label: 'Child 4 DOB', format: 'date' },
+        { table: 4, row: 5, col: 2, field: 'children[3].age',      label: 'Child 4 Age' },
+        { table: 4, row: 5, col: 3, field: 'children[3].school',   label: 'Child 4 School' },
+        { table: 4, row: 5, col: 4, field: 'children[3].annualSchoolFees', label: 'Child 4 Annual Fees', format: 'currency' },
+
         // Child 5
-        { table: 4, row: 6, col: 0, field: 'children[4].firstName',       label: 'Child 5 Name', format: 'childName' },
-        { table: 4, row: 6, col: 1, field: 'children[4].dob',             label: 'Child 5 DOB', format: 'date' },
-        { table: 4, row: 6, col: 2, field: 'children[4].age',             label: 'Child 5 Age' },
-        { table: 4, row: 6, col: 3, field: 'children[4].school',          label: 'Child 5 School' },
-        { table: 4, row: 6, col: 7, field: 'children[4].annualSchoolFees', label: 'Child 5 Annual Fees', format: 'currency' },
+        { table: 4, row: 6, col: 0, field: 'children[4]',          label: 'Child 5 Name', format: 'childFullName' },
+        { table: 4, row: 6, col: 1, field: 'children[4].dateOfBirth', label: 'Child 5 DOB', format: 'date' },
+        { table: 4, row: 6, col: 2, field: 'children[4].age',      label: 'Child 5 Age' },
+        { table: 4, row: 6, col: 3, field: 'children[4].school',   label: 'Child 5 School' },
+        { table: 4, row: 6, col: 4, field: 'children[4].annualSchoolFees', label: 'Child 5 Annual Fees', format: 'currency' },
     ],
 
     // =========================================================================
     // TABLE 5: Protection / Insurance
-    // 8 rows x 13 cols — Up to 3 policies (rows 2-4)
     // =========================================================================
     protection: [
-        // Policy 1
-        { table: 5, row: 2, col: 0,  field: 'protection[0].provider',    label: 'Protection 1 Provider' },
-        { table: 5, row: 2, col: 5,  field: 'protection[0].type',        label: 'Protection 1 Type' },
-        { table: 5, row: 2, col: 6,  field: 'protection[0].premium',     label: 'Protection 1 Premium', format: 'currency' },
-        { table: 5, row: 2, col: 9,  field: 'protection[0].term',        label: 'Protection 1 Term' },
-        { table: 5, row: 2, col: 12, field: 'protection[0].sumAssured',  label: 'Protection 1 Cover Amount', format: 'currency' },
-        // Policy 2
-        { table: 5, row: 3, col: 0,  field: 'protection[1].provider',    label: 'Protection 2 Provider' },
-        { table: 5, row: 3, col: 5,  field: 'protection[1].type',        label: 'Protection 2 Type' },
-        { table: 5, row: 3, col: 6,  field: 'protection[1].premium',     label: 'Protection 2 Premium', format: 'currency' },
-        { table: 5, row: 3, col: 9,  field: 'protection[1].term',        label: 'Protection 2 Term' },
-        { table: 5, row: 3, col: 12, field: 'protection[1].sumAssured',  label: 'Protection 2 Cover Amount', format: 'currency' },
-        // Policy 3
-        { table: 5, row: 4, col: 0,  field: 'protection[2].provider',    label: 'Protection 3 Provider' },
-        { table: 5, row: 4, col: 5,  field: 'protection[2].type',        label: 'Protection 3 Type' },
-        { table: 5, row: 4, col: 6,  field: 'protection[2].premium',     label: 'Protection 3 Premium', format: 'currency' },
-        { table: 5, row: 4, col: 9,  field: 'protection[2].term',        label: 'Protection 3 Term' },
-        { table: 5, row: 4, col: 12, field: 'protection[2].sumAssured',  label: 'Protection 3 Cover Amount', format: 'currency' },
+        // Policies (rows 2-4)
+        { table: 5, row: 2, col: 0, field: 'protection[0].provider',   label: 'Protection 1 Provider' },
+        { table: 5, row: 2, col: 1, field: 'protection[0].type',       label: 'Protection 1 Type' },
+        { table: 5, row: 2, col: 2, field: 'protection[0].premium',    label: 'Protection 1 Premium', format: 'currency' },
+        { table: 5, row: 2, col: 3, field: 'protection[0].term',       label: 'Protection 1 Term' },
+        { table: 5, row: 2, col: 4, field: 'protection[0].sumAssured', label: 'Protection 1 Cover Amount', format: 'currency' },
 
-        // Health & Will (rows 5-7)
-        { table: 5, row: 5, col: 11, field: 'personal.healthDetails',    label: 'Client Health Details' },
-        { table: 5, row: 6, col: 11, field: 'spouse.healthDetails',      label: 'Spouse Health Details' },
+        { table: 5, row: 3, col: 0, field: 'protection[1].provider',   label: 'Protection 2 Provider' },
+        { table: 5, row: 3, col: 1, field: 'protection[1].type',       label: 'Protection 2 Type' },
+        { table: 5, row: 3, col: 2, field: 'protection[1].premium',    label: 'Protection 2 Premium', format: 'currency' },
+        { table: 5, row: 3, col: 3, field: 'protection[1].term',       label: 'Protection 2 Term' },
+        { table: 5, row: 3, col: 4, field: 'protection[1].sumAssured', label: 'Protection 2 Cover Amount', format: 'currency' },
+
+        { table: 5, row: 4, col: 0, field: 'protection[2].provider',   label: 'Protection 3 Provider' },
+        { table: 5, row: 4, col: 1, field: 'protection[2].type',       label: 'Protection 3 Type' },
+        { table: 5, row: 4, col: 2, field: 'protection[2].premium',    label: 'Protection 3 Premium', format: 'currency' },
+        { table: 5, row: 4, col: 3, field: 'protection[2].term',       label: 'Protection 3 Term' },
+        { table: 5, row: 4, col: 4, field: 'protection[2].sumAssured', label: 'Protection 3 Cover Amount', format: 'currency' },
+
+        // Smoker / Health (row 5-6 checkboxes)
+        { table: 5, row: 5, col: 2,  field: 'personal.smoker',       label: 'Client Smoker Yes', format: 'checkboxYes' },
+        { table: 5, row: 5, col: 4,  field: 'personal.smoker',       label: 'Client Smoker No', format: 'checkboxNo' },
+        { table: 5, row: 5, col: 7,  field: 'personal.healthStatus', label: 'Client Good Health Yes', format: 'checkboxYes' },
+        { table: 5, row: 5, col: 9,  field: 'personal.healthStatus', label: 'Client Good Health No', format: 'checkboxNo' },
+        { table: 5, row: 5, col: 11, field: 'personal.healthStatus', label: 'Client Health Details' },
+
+        { table: 5, row: 6, col: 2,  field: 'spouse.smoker',       label: 'Spouse Smoker Yes', format: 'checkboxYes' },
+        { table: 5, row: 6, col: 4,  field: 'spouse.smoker',       label: 'Spouse Smoker No', format: 'checkboxNo' },
+        { table: 5, row: 6, col: 7,  field: 'spouse.healthStatus', label: 'Spouse Good Health Yes', format: 'checkboxYes' },
+        { table: 5, row: 6, col: 9,  field: 'spouse.healthStatus', label: 'Spouse Good Health No', format: 'checkboxNo' },
+        { table: 5, row: 6, col: 11, field: 'spouse.healthStatus', label: 'Spouse Health Details' },
     ],
 
     // =========================================================================
     // TABLE 7: Bank Accounts
-    // 8 rows x 4 cols — Up to 6 accounts (rows 2-7)
     // =========================================================================
     bankAccounts: [
         { table: 7, row: 2, col: 0, field: 'bankAccounts[0].bank',         label: 'Bank 1 Name' },
@@ -183,7 +203,6 @@ const FactfindMapping = {
 
     // =========================================================================
     // TABLE 8: Investments
-    // 8 rows x 4 cols — Up to 6 investments (rows 2-7)
     // =========================================================================
     investments: [
         { table: 8, row: 2, col: 0, field: 'investments[0].provider',     label: 'Investment 1 Provider' },
@@ -219,7 +238,6 @@ const FactfindMapping = {
 
     // =========================================================================
     // TABLE 9: Pensions
-    // 8 rows x 4 cols — Up to 6 pensions (rows 2-7)
     // =========================================================================
     pensions: [
         { table: 9, row: 2, col: 0, field: 'pensions[0].provider',     label: 'Pension 1 Provider' },
@@ -255,58 +273,63 @@ const FactfindMapping = {
 
     // =========================================================================
     // TABLES 10-14: Properties (1-5)
-    // Each property table: 4-5 rows x 6 cols
+    // Each property table: rows 2 and 4 contain data
     // =========================================================================
     properties: [
         // Property 1 (Table 10)
-        { table: 10, row: 1, col: 0, field: 'properties[0].address',           label: 'Property 1 Location' },
-        { table: 10, row: 1, col: 2, field: 'properties[0].purchasePrice',     label: 'Property 1 Price Paid', format: 'currency' },
-        { table: 10, row: 1, col: 3, field: 'properties[0].currentValue',      label: 'Property 1 Current Value', format: 'currency' },
-        { table: 10, row: 1, col: 4, field: 'properties[0].purchaseDate',      label: 'Property 1 Purchase Date', format: 'date' },
-        { table: 10, row: 1, col: 5, field: 'properties[0].mortgageBalance',   label: 'Property 1 Outstanding Mortgage', format: 'currency' },
-        { table: 10, row: 3, col: 0, field: 'properties[0].monthlyPayment',    label: 'Property 1 Repayments', format: 'currency' },
-        { table: 10, row: 3, col: 1, field: 'properties[0].rentalIncome',      label: 'Property 1 Rental Income', format: 'currency' },
-        { table: 10, row: 3, col: 4, field: 'properties[0].mortgageRate',      label: 'Property 1 Interest Rate' },
+        { table: 10, row: 2, col: 0, field: 'properties[0].address',         label: 'Property 1 Location', format: 'address' },
+        { table: 10, row: 2, col: 1, field: 'properties[0].purchasePrice',   label: 'Property 1 Price Paid', format: 'currency' },
+        { table: 10, row: 2, col: 2, field: 'properties[0].currentValue',    label: 'Property 1 Current Value', format: 'currency' },
+        { table: 10, row: 2, col: 3, field: 'properties[0].purchaseDate',    label: 'Property 1 Purchase Date', format: 'date' },
+        { table: 10, row: 2, col: 4, field: 'properties[0].mortgageBalance', label: 'Property 1 Outstanding Mortgage', format: 'currency' },
+        { table: 10, row: 4, col: 0, field: 'properties[0].monthlyPayment',  label: 'Property 1 Repayments', format: 'currency' },
+        { table: 10, row: 4, col: 1, field: 'properties[0].rentalIncome',    label: 'Property 1 Rental Income', format: 'currency' },
+        { table: 10, row: 4, col: 4, field: 'properties[0].mortgageRate',    label: 'Property 1 Interest Rate' },
+        { table: 10, row: 4, col: 5, field: 'properties[0].mortgageEndDate', label: 'Property 1 Mortgage Rate Expiry', format: 'date' },
 
         // Property 2 (Table 11)
-        { table: 11, row: 0, col: 0, field: 'properties[1].address',           label: 'Property 2 Location' },
-        { table: 11, row: 0, col: 2, field: 'properties[1].purchasePrice',     label: 'Property 2 Price Paid', format: 'currency' },
-        { table: 11, row: 0, col: 3, field: 'properties[1].currentValue',      label: 'Property 2 Current Value', format: 'currency' },
-        { table: 11, row: 0, col: 4, field: 'properties[1].purchaseDate',      label: 'Property 2 Purchase Date', format: 'date' },
-        { table: 11, row: 0, col: 5, field: 'properties[1].mortgageBalance',   label: 'Property 2 Outstanding Mortgage', format: 'currency' },
-        { table: 11, row: 2, col: 0, field: 'properties[1].monthlyPayment',    label: 'Property 2 Repayments', format: 'currency' },
-        { table: 11, row: 2, col: 1, field: 'properties[1].rentalIncome',      label: 'Property 2 Rental Income', format: 'currency' },
-        { table: 11, row: 2, col: 4, field: 'properties[1].mortgageRate',      label: 'Property 2 Interest Rate' },
+        { table: 11, row: 1, col: 0, field: 'properties[1].address',         label: 'Property 2 Location', format: 'address' },
+        { table: 11, row: 1, col: 1, field: 'properties[1].purchasePrice',   label: 'Property 2 Price Paid', format: 'currency' },
+        { table: 11, row: 1, col: 2, field: 'properties[1].currentValue',    label: 'Property 2 Current Value', format: 'currency' },
+        { table: 11, row: 1, col: 3, field: 'properties[1].purchaseDate',    label: 'Property 2 Purchase Date', format: 'date' },
+        { table: 11, row: 1, col: 4, field: 'properties[1].mortgageBalance', label: 'Property 2 Outstanding Mortgage', format: 'currency' },
+        { table: 11, row: 3, col: 0, field: 'properties[1].monthlyPayment',  label: 'Property 2 Repayments', format: 'currency' },
+        { table: 11, row: 3, col: 1, field: 'properties[1].rentalIncome',    label: 'Property 2 Rental Income', format: 'currency' },
+        { table: 11, row: 3, col: 4, field: 'properties[1].mortgageRate',    label: 'Property 2 Interest Rate' },
+        { table: 11, row: 3, col: 5, field: 'properties[1].mortgageEndDate', label: 'Property 2 Mortgage Rate Expiry', format: 'date' },
 
         // Property 3 (Table 12)
-        { table: 12, row: 0, col: 0, field: 'properties[2].address',           label: 'Property 3 Location' },
-        { table: 12, row: 0, col: 2, field: 'properties[2].purchasePrice',     label: 'Property 3 Price Paid', format: 'currency' },
-        { table: 12, row: 0, col: 3, field: 'properties[2].currentValue',      label: 'Property 3 Current Value', format: 'currency' },
-        { table: 12, row: 0, col: 4, field: 'properties[2].purchaseDate',      label: 'Property 3 Purchase Date', format: 'date' },
-        { table: 12, row: 0, col: 5, field: 'properties[2].mortgageBalance',   label: 'Property 3 Outstanding Mortgage', format: 'currency' },
-        { table: 12, row: 2, col: 0, field: 'properties[2].monthlyPayment',    label: 'Property 3 Repayments', format: 'currency' },
-        { table: 12, row: 2, col: 1, field: 'properties[2].rentalIncome',      label: 'Property 3 Rental Income', format: 'currency' },
-        { table: 12, row: 2, col: 4, field: 'properties[2].mortgageRate',      label: 'Property 3 Interest Rate' },
+        { table: 12, row: 1, col: 0, field: 'properties[2].address',         label: 'Property 3 Location', format: 'address' },
+        { table: 12, row: 1, col: 1, field: 'properties[2].purchasePrice',   label: 'Property 3 Price Paid', format: 'currency' },
+        { table: 12, row: 1, col: 2, field: 'properties[2].currentValue',    label: 'Property 3 Current Value', format: 'currency' },
+        { table: 12, row: 1, col: 3, field: 'properties[2].purchaseDate',    label: 'Property 3 Purchase Date', format: 'date' },
+        { table: 12, row: 1, col: 4, field: 'properties[2].mortgageBalance', label: 'Property 3 Outstanding Mortgage', format: 'currency' },
+        { table: 12, row: 3, col: 0, field: 'properties[2].monthlyPayment',  label: 'Property 3 Repayments', format: 'currency' },
+        { table: 12, row: 3, col: 1, field: 'properties[2].rentalIncome',    label: 'Property 3 Rental Income', format: 'currency' },
+        { table: 12, row: 3, col: 4, field: 'properties[2].mortgageRate',    label: 'Property 3 Interest Rate' },
+        { table: 12, row: 3, col: 5, field: 'properties[2].mortgageEndDate', label: 'Property 3 Mortgage Rate Expiry', format: 'date' },
 
         // Property 4 (Table 13)
-        { table: 13, row: 0, col: 0, field: 'properties[3].address',           label: 'Property 4 Location' },
-        { table: 13, row: 0, col: 2, field: 'properties[3].purchasePrice',     label: 'Property 4 Price Paid', format: 'currency' },
-        { table: 13, row: 0, col: 3, field: 'properties[3].currentValue',      label: 'Property 4 Current Value', format: 'currency' },
-        { table: 13, row: 0, col: 4, field: 'properties[3].purchaseDate',      label: 'Property 4 Purchase Date', format: 'date' },
-        { table: 13, row: 0, col: 5, field: 'properties[3].mortgageBalance',   label: 'Property 4 Outstanding Mortgage', format: 'currency' },
-        { table: 13, row: 2, col: 0, field: 'properties[3].monthlyPayment',    label: 'Property 4 Repayments', format: 'currency' },
-        { table: 13, row: 2, col: 1, field: 'properties[3].rentalIncome',      label: 'Property 4 Rental Income', format: 'currency' },
-        { table: 13, row: 2, col: 4, field: 'properties[3].mortgageRate',      label: 'Property 4 Interest Rate' },
+        { table: 13, row: 1, col: 0, field: 'properties[3].address',         label: 'Property 4 Location', format: 'address' },
+        { table: 13, row: 1, col: 1, field: 'properties[3].purchasePrice',   label: 'Property 4 Price Paid', format: 'currency' },
+        { table: 13, row: 1, col: 2, field: 'properties[3].currentValue',    label: 'Property 4 Current Value', format: 'currency' },
+        { table: 13, row: 1, col: 3, field: 'properties[3].purchaseDate',    label: 'Property 4 Purchase Date', format: 'date' },
+        { table: 13, row: 1, col: 4, field: 'properties[3].mortgageBalance', label: 'Property 4 Outstanding Mortgage', format: 'currency' },
+        { table: 13, row: 3, col: 0, field: 'properties[3].monthlyPayment',  label: 'Property 4 Repayments', format: 'currency' },
+        { table: 13, row: 3, col: 1, field: 'properties[3].rentalIncome',    label: 'Property 4 Rental Income', format: 'currency' },
+        { table: 13, row: 3, col: 4, field: 'properties[3].mortgageRate',    label: 'Property 4 Interest Rate' },
+        { table: 13, row: 3, col: 5, field: 'properties[3].mortgageEndDate', label: 'Property 4 Mortgage Rate Expiry', format: 'date' },
 
         // Property 5 (Table 14)
-        { table: 14, row: 0, col: 0, field: 'properties[4].address',           label: 'Property 5 Location' },
-        { table: 14, row: 0, col: 2, field: 'properties[4].purchasePrice',     label: 'Property 5 Price Paid', format: 'currency' },
-        { table: 14, row: 0, col: 3, field: 'properties[4].currentValue',      label: 'Property 5 Current Value', format: 'currency' },
-        { table: 14, row: 0, col: 4, field: 'properties[4].purchaseDate',      label: 'Property 5 Purchase Date', format: 'date' },
-        { table: 14, row: 0, col: 5, field: 'properties[4].mortgageBalance',   label: 'Property 5 Outstanding Mortgage', format: 'currency' },
-        { table: 14, row: 2, col: 0, field: 'properties[4].monthlyPayment',    label: 'Property 5 Repayments', format: 'currency' },
-        { table: 14, row: 2, col: 1, field: 'properties[4].rentalIncome',      label: 'Property 5 Rental Income', format: 'currency' },
-        { table: 14, row: 2, col: 4, field: 'properties[4].mortgageRate',      label: 'Property 5 Interest Rate' },
+        { table: 14, row: 1, col: 0, field: 'properties[4].address',         label: 'Property 5 Location', format: 'address' },
+        { table: 14, row: 1, col: 1, field: 'properties[4].purchasePrice',   label: 'Property 5 Price Paid', format: 'currency' },
+        { table: 14, row: 1, col: 2, field: 'properties[4].currentValue',    label: 'Property 5 Current Value', format: 'currency' },
+        { table: 14, row: 1, col: 3, field: 'properties[4].purchaseDate',    label: 'Property 5 Purchase Date', format: 'date' },
+        { table: 14, row: 1, col: 4, field: 'properties[4].mortgageBalance', label: 'Property 5 Outstanding Mortgage', format: 'currency' },
+        { table: 14, row: 3, col: 0, field: 'properties[4].monthlyPayment',  label: 'Property 5 Repayments', format: 'currency' },
+        { table: 14, row: 3, col: 1, field: 'properties[4].rentalIncome',    label: 'Property 5 Rental Income', format: 'currency' },
+        { table: 14, row: 3, col: 4, field: 'properties[4].mortgageRate',    label: 'Property 5 Interest Rate' },
+        { table: 14, row: 3, col: 5, field: 'properties[4].mortgageEndDate', label: 'Property 5 Mortgage Rate Expiry', format: 'date' },
     ],
 
     // =========================================================================
@@ -337,11 +360,10 @@ const FactfindMapping = {
 
     // =========================================================================
     // TABLE 16: Estate Planning
-    // 5 rows x 2 cols
     // =========================================================================
     estatePlanning: [
-        { table: 16, row: 3, col: 0, field: 'estatePlanning.trustDetails',  label: 'Trust Details' },
-        { table: 16, row: 3, col: 1, field: 'estatePlanning.willDetails',   label: 'Will Details' },
+        { table: 16, row: 4, col: 0, field: 'estatePlanning.trustDetails', label: 'Trust Details' },
+        { table: 16, row: 4, col: 1, field: 'estatePlanning.willLocation', label: 'Will Details' },
     ],
 
     // =========================================================================
@@ -389,6 +411,40 @@ const FactfindMapping = {
         if (value === null || value === undefined || value === '') return '';
 
         switch (format) {
+            case 'fullName': {
+                if (typeof value === 'object' && value !== null) {
+                    const first = value.preferredName || value.firstName || '';
+                    const last = value.lastName || '';
+                    const name = `${first} ${last}`.trim();
+                    return name || '';
+                }
+                return String(value);
+            }
+
+            case 'childFullName': {
+                if (typeof value === 'object' && value !== null) {
+                    const first = value.firstName || '';
+                    const last = value.lastName || '';
+                    return `${first} ${last}`.trim();
+                }
+                return String(value);
+            }
+
+            case 'address': {
+                if (typeof value === 'object' && value !== null) {
+                    const parts = [
+                        value.line1,
+                        value.line2,
+                        value.city,
+                        value.state,
+                        value.postcode,
+                        value.country
+                    ].filter(Boolean);
+                    return parts.join(', ');
+                }
+                return String(value);
+            }
+
             case 'date':
                 if (typeof value === 'string' && value.includes('-')) {
                     const d = new Date(value);
@@ -415,6 +471,12 @@ const FactfindMapping = {
                 return value?.toLowerCase() === 'divorced' ? '\u2611' : '\u2610';
             case 'checkboxWidowed':
                 return value?.toLowerCase() === 'widowed' ? '\u2611' : '\u2610';
+            case 'checkboxYes':
+                if (typeof value === 'boolean') return value ? '\u2611' : '\u2610';
+                return String(value).toLowerCase() === 'yes' ? '\u2611' : '\u2610';
+            case 'checkboxNo':
+                if (typeof value === 'boolean') return !value ? '\u2611' : '\u2610';
+                return String(value).toLowerCase() === 'no' ? '\u2611' : '\u2610';
 
             default:
                 return String(value);
