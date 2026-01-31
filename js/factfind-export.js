@@ -48,6 +48,11 @@ const FactfindExport = {
             const allMappings = FactfindMapping.getAllMappings();
             let fieldsPopulated = 0;
 
+            console.log('Factfind export: client data keys:', Object.keys(client));
+            console.log('Factfind export: personal data:', JSON.stringify(client.personal));
+            console.log('Factfind export: total mappings to process:', allMappings.length);
+            console.log('Factfind export: tables found in document:', tables.length);
+
             for (const mapping of allMappings) {
                 const value = FactfindMapping.resolveField(client, mapping.field);
                 if (value === null || value === undefined || value === '') continue;

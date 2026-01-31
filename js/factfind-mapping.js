@@ -26,7 +26,7 @@ const FactfindMapping = {
         // Client
         { table: 0, row: 1,  col: 1,  field: 'personal.firstName',           label: 'Client First Name' },
         { table: 0, row: 1,  col: 3,  field: 'personal.lastName',            label: 'Client Last Name' },
-        { table: 0, row: 2,  col: 1,  field: 'personal.dob',                 label: 'Client DOB', format: 'date' },
+        { table: 0, row: 2,  col: 1,  field: 'personal.dateOfBirth',           label: 'Client DOB', format: 'date' },
         { table: 0, row: 2,  col: 4,  field: 'personal.age',                 label: 'Client Age' },
         { table: 0, row: 3,  col: 1,  field: 'personal.countryOfResidence',  label: 'Client Country of Residence' },
         { table: 0, row: 4,  col: 1,  field: 'personal.nationality',         label: 'Client Nationality' },
@@ -39,7 +39,7 @@ const FactfindMapping = {
         // Spouse/Partner
         { table: 0, row: 1,  col: 7,  field: 'spouse.firstName',             label: 'Spouse First Name' },
         { table: 0, row: 1,  col: 9,  field: 'spouse.lastName',              label: 'Spouse Last Name' },
-        { table: 0, row: 2,  col: 7,  field: 'spouse.dob',                   label: 'Spouse DOB', format: 'date' },
+        { table: 0, row: 2,  col: 7,  field: 'spouse.dateOfBirth',             label: 'Spouse DOB', format: 'date' },
         { table: 0, row: 2,  col: 10, field: 'spouse.age',                   label: 'Spouse Age' },
         { table: 0, row: 3,  col: 7,  field: 'spouse.countryOfResidence',    label: 'Spouse Country of Residence' },
         { table: 0, row: 4,  col: 7,  field: 'spouse.nationality',           label: 'Spouse Nationality' },
@@ -64,19 +64,19 @@ const FactfindMapping = {
     // =========================================================================
     employment: [
         // Client employment (left side)
-        { table: 3, row: 2,  col: 0,  field: 'employment.client.jobTitle',           label: 'Client Job Title' },
-        { table: 3, row: 2,  col: 4,  field: 'employment.client.employer',           label: 'Client Employer' },
-        { table: 3, row: 4,  col: 0,  field: 'employment.client.monthlyGrossIncome', label: 'Client Monthly Income', format: 'currency' },
-        { table: 3, row: 4,  col: 4,  field: 'employment.client.monthlySurplus',     label: 'Client Monthly Surplus', format: 'currency' },
-        { table: 3, row: 6,  col: 4,  field: 'employment.client.annualBonus',        label: 'Client Bonus Amount', format: 'currency' },
-        { table: 3, row: 8,  col: 0,  field: 'employment.client.employmentHistory',  label: 'Client Employment History' },
+        { table: 3, row: 2,  col: 0,  field: 'employment.jobTitle',           label: 'Client Job Title' },
+        { table: 3, row: 2,  col: 4,  field: 'employment.employer',           label: 'Client Employer' },
+        { table: 3, row: 4,  col: 0,  field: 'employment.monthlyGrossIncome', label: 'Client Monthly Income', format: 'currency' },
+        { table: 3, row: 4,  col: 4,  field: 'employment.monthlySurplus',     label: 'Client Monthly Surplus', format: 'currency' },
+        { table: 3, row: 6,  col: 4,  field: 'employment.annualBonus',        label: 'Client Bonus Amount', format: 'currency' },
+        { table: 3, row: 8,  col: 0,  field: 'employment.notes',              label: 'Client Employment History' },
 
         // Spouse employment (right side)
-        { table: 3, row: 2,  col: 7,  field: 'employment.spouse.jobTitle',           label: 'Spouse Job Title' },
-        { table: 3, row: 2,  col: 8,  field: 'employment.spouse.employer',           label: 'Spouse Employer' },
-        { table: 3, row: 4,  col: 7,  field: 'employment.spouse.monthlyGrossIncome', label: 'Spouse Monthly Income', format: 'currency' },
-        { table: 3, row: 4,  col: 8,  field: 'employment.spouse.monthlySurplus',     label: 'Spouse Monthly Surplus', format: 'currency' },
-        { table: 3, row: 6,  col: 8,  field: 'employment.spouse.annualBonus',        label: 'Spouse Bonus Amount', format: 'currency' },
+        { table: 3, row: 2,  col: 7,  field: 'spouseEmployment.jobTitle',           label: 'Spouse Job Title' },
+        { table: 3, row: 2,  col: 8,  field: 'spouseEmployment.employer',           label: 'Spouse Employer' },
+        { table: 3, row: 4,  col: 7,  field: 'spouseEmployment.monthlyGrossIncome', label: 'Spouse Monthly Income', format: 'currency' },
+        { table: 3, row: 4,  col: 8,  field: 'spouseEmployment.monthlySurplus',     label: 'Spouse Monthly Surplus', format: 'currency' },
+        { table: 3, row: 6,  col: 8,  field: 'spouseEmployment.annualBonus',        label: 'Spouse Bonus Amount', format: 'currency' },
     ],
 
     // =========================================================================
@@ -86,31 +86,31 @@ const FactfindMapping = {
     children: [
         // Child 1
         { table: 4, row: 2, col: 0, field: 'children[0].firstName',       label: 'Child 1 Name', format: 'childName' },
-        { table: 4, row: 2, col: 1, field: 'children[0].dob',             label: 'Child 1 DOB', format: 'date' },
+        { table: 4, row: 2, col: 1, field: 'children[0].dateOfBirth',      label: 'Child 1 DOB', format: 'date' },
         { table: 4, row: 2, col: 2, field: 'children[0].age',             label: 'Child 1 Age' },
         { table: 4, row: 2, col: 3, field: 'children[0].school',          label: 'Child 1 School' },
         { table: 4, row: 2, col: 7, field: 'children[0].annualSchoolFees', label: 'Child 1 Annual Fees', format: 'currency' },
         // Child 2
         { table: 4, row: 3, col: 0, field: 'children[1].firstName',       label: 'Child 2 Name', format: 'childName' },
-        { table: 4, row: 3, col: 1, field: 'children[1].dob',             label: 'Child 2 DOB', format: 'date' },
+        { table: 4, row: 3, col: 1, field: 'children[1].dateOfBirth',      label: 'Child 2 DOB', format: 'date' },
         { table: 4, row: 3, col: 2, field: 'children[1].age',             label: 'Child 2 Age' },
         { table: 4, row: 3, col: 3, field: 'children[1].school',          label: 'Child 2 School' },
         { table: 4, row: 3, col: 7, field: 'children[1].annualSchoolFees', label: 'Child 2 Annual Fees', format: 'currency' },
         // Child 3
         { table: 4, row: 4, col: 0, field: 'children[2].firstName',       label: 'Child 3 Name', format: 'childName' },
-        { table: 4, row: 4, col: 1, field: 'children[2].dob',             label: 'Child 3 DOB', format: 'date' },
+        { table: 4, row: 4, col: 1, field: 'children[2].dateOfBirth',      label: 'Child 3 DOB', format: 'date' },
         { table: 4, row: 4, col: 2, field: 'children[2].age',             label: 'Child 3 Age' },
         { table: 4, row: 4, col: 3, field: 'children[2].school',          label: 'Child 3 School' },
         { table: 4, row: 4, col: 7, field: 'children[2].annualSchoolFees', label: 'Child 3 Annual Fees', format: 'currency' },
         // Child 4
         { table: 4, row: 5, col: 0, field: 'children[3].firstName',       label: 'Child 4 Name', format: 'childName' },
-        { table: 4, row: 5, col: 1, field: 'children[3].dob',             label: 'Child 4 DOB', format: 'date' },
+        { table: 4, row: 5, col: 1, field: 'children[3].dateOfBirth',      label: 'Child 4 DOB', format: 'date' },
         { table: 4, row: 5, col: 2, field: 'children[3].age',             label: 'Child 4 Age' },
         { table: 4, row: 5, col: 3, field: 'children[3].school',          label: 'Child 4 School' },
         { table: 4, row: 5, col: 7, field: 'children[3].annualSchoolFees', label: 'Child 4 Annual Fees', format: 'currency' },
         // Child 5
         { table: 4, row: 6, col: 0, field: 'children[4].firstName',       label: 'Child 5 Name', format: 'childName' },
-        { table: 4, row: 6, col: 1, field: 'children[4].dob',             label: 'Child 5 DOB', format: 'date' },
+        { table: 4, row: 6, col: 1, field: 'children[4].dateOfBirth',      label: 'Child 5 DOB', format: 'date' },
         { table: 4, row: 6, col: 2, field: 'children[4].age',             label: 'Child 5 Age' },
         { table: 4, row: 6, col: 3, field: 'children[4].school',          label: 'Child 5 School' },
         { table: 4, row: 6, col: 7, field: 'children[4].annualSchoolFees', label: 'Child 5 Annual Fees', format: 'currency' },
@@ -141,8 +141,8 @@ const FactfindMapping = {
         { table: 5, row: 4, col: 12, field: 'protection[2].sumAssured',  label: 'Protection 3 Cover Amount', format: 'currency' },
 
         // Health & Will (rows 5-7)
-        { table: 5, row: 5, col: 11, field: 'personal.healthDetails',    label: 'Client Health Details' },
-        { table: 5, row: 6, col: 11, field: 'spouse.healthDetails',      label: 'Spouse Health Details' },
+        { table: 5, row: 5, col: 11, field: 'personal.healthStatus',     label: 'Client Health Details' },
+        { table: 5, row: 6, col: 11, field: 'spouse.healthStatus',       label: 'Spouse Health Details' },
     ],
 
     // =========================================================================
@@ -259,7 +259,7 @@ const FactfindMapping = {
     // =========================================================================
     properties: [
         // Property 1 (Table 10)
-        { table: 10, row: 1, col: 0, field: 'properties[0].address',           label: 'Property 1 Location' },
+        { table: 10, row: 1, col: 0, field: 'properties[0].address.line1',           label: 'Property 1 Location' },
         { table: 10, row: 1, col: 2, field: 'properties[0].purchasePrice',     label: 'Property 1 Price Paid', format: 'currency' },
         { table: 10, row: 1, col: 3, field: 'properties[0].currentValue',      label: 'Property 1 Current Value', format: 'currency' },
         { table: 10, row: 1, col: 4, field: 'properties[0].purchaseDate',      label: 'Property 1 Purchase Date', format: 'date' },
@@ -269,7 +269,7 @@ const FactfindMapping = {
         { table: 10, row: 3, col: 4, field: 'properties[0].mortgageRate',      label: 'Property 1 Interest Rate' },
 
         // Property 2 (Table 11)
-        { table: 11, row: 0, col: 0, field: 'properties[1].address',           label: 'Property 2 Location' },
+        { table: 11, row: 0, col: 0, field: 'properties[1].address.line1',           label: 'Property 2 Location' },
         { table: 11, row: 0, col: 2, field: 'properties[1].purchasePrice',     label: 'Property 2 Price Paid', format: 'currency' },
         { table: 11, row: 0, col: 3, field: 'properties[1].currentValue',      label: 'Property 2 Current Value', format: 'currency' },
         { table: 11, row: 0, col: 4, field: 'properties[1].purchaseDate',      label: 'Property 2 Purchase Date', format: 'date' },
@@ -279,7 +279,7 @@ const FactfindMapping = {
         { table: 11, row: 2, col: 4, field: 'properties[1].mortgageRate',      label: 'Property 2 Interest Rate' },
 
         // Property 3 (Table 12)
-        { table: 12, row: 0, col: 0, field: 'properties[2].address',           label: 'Property 3 Location' },
+        { table: 12, row: 0, col: 0, field: 'properties[2].address.line1',           label: 'Property 3 Location' },
         { table: 12, row: 0, col: 2, field: 'properties[2].purchasePrice',     label: 'Property 3 Price Paid', format: 'currency' },
         { table: 12, row: 0, col: 3, field: 'properties[2].currentValue',      label: 'Property 3 Current Value', format: 'currency' },
         { table: 12, row: 0, col: 4, field: 'properties[2].purchaseDate',      label: 'Property 3 Purchase Date', format: 'date' },
@@ -289,7 +289,7 @@ const FactfindMapping = {
         { table: 12, row: 2, col: 4, field: 'properties[2].mortgageRate',      label: 'Property 3 Interest Rate' },
 
         // Property 4 (Table 13)
-        { table: 13, row: 0, col: 0, field: 'properties[3].address',           label: 'Property 4 Location' },
+        { table: 13, row: 0, col: 0, field: 'properties[3].address.line1',           label: 'Property 4 Location' },
         { table: 13, row: 0, col: 2, field: 'properties[3].purchasePrice',     label: 'Property 4 Price Paid', format: 'currency' },
         { table: 13, row: 0, col: 3, field: 'properties[3].currentValue',      label: 'Property 4 Current Value', format: 'currency' },
         { table: 13, row: 0, col: 4, field: 'properties[3].purchaseDate',      label: 'Property 4 Purchase Date', format: 'date' },
@@ -299,7 +299,7 @@ const FactfindMapping = {
         { table: 13, row: 2, col: 4, field: 'properties[3].mortgageRate',      label: 'Property 4 Interest Rate' },
 
         // Property 5 (Table 14)
-        { table: 14, row: 0, col: 0, field: 'properties[4].address',           label: 'Property 5 Location' },
+        { table: 14, row: 0, col: 0, field: 'properties[4].address.line1',           label: 'Property 5 Location' },
         { table: 14, row: 0, col: 2, field: 'properties[4].purchasePrice',     label: 'Property 5 Price Paid', format: 'currency' },
         { table: 14, row: 0, col: 3, field: 'properties[4].currentValue',      label: 'Property 5 Current Value', format: 'currency' },
         { table: 14, row: 0, col: 4, field: 'properties[4].purchaseDate',      label: 'Property 5 Purchase Date', format: 'date' },
@@ -341,7 +341,7 @@ const FactfindMapping = {
     // =========================================================================
     estatePlanning: [
         { table: 16, row: 3, col: 0, field: 'estatePlanning.trustDetails',  label: 'Trust Details' },
-        { table: 16, row: 3, col: 1, field: 'estatePlanning.willDetails',   label: 'Will Details' },
+        { table: 16, row: 3, col: 1, field: 'estatePlanning.willLocation',  label: 'Will Details' },
     ],
 
     // =========================================================================
