@@ -252,6 +252,7 @@ const FactfindExport = {
         `).join('');
 
         const checkbox = (checked) => checked ? '&#x2611;' : '&#x2610;';
+        const circle = (checked) => checked ? '<span class="circle checked"></span>' : '<span class="circle"></span>';
         const relationship = (val, target) => String(val || '').toLowerCase() === target;
         const currency = (val, cur) => {
             if (val === null || val === undefined || val === '') return '';
@@ -355,21 +356,47 @@ const FactfindExport = {
   <meta charset="utf-8">
   <title>Factfind</title>
   <style>
+    @page { size: A4; margin: 12mm; }
     body { font-family: "Times New Roman", serif; font-size: 10pt; color: #111; }
-    h1 { font-size: 14pt; color: #3b1b5a; margin: 0 0 6px 0; }
-    h2 { font-size: 11pt; margin: 12px 0 6px 0; color: #3b1b5a; }
-    .header-line { height: 2px; background: #6a4bc4; margin: 6px 0 10px 0; }
+    .page { width: 190mm; margin: 0 auto; }
+    .page-break { page-break-before: always; }
+    h1 { font-size: 12pt; color: #3b1b5a; margin: 0 0 4px 0; font-weight: normal; }
+    h2 { font-size: 10pt; margin: 10px 0 6px 0; color: #3b1b5a; font-weight: normal; }
+    .header-line { height: 2px; background: #6a4bc4; margin: 4px 0 8px 0; }
+    .header { display: flex; align-items: center; justify-content: space-between; }
+    .logo { display: flex; align-items: center; gap: 6px; color: #3b1b5a; font-size: 10pt; }
+    .logo-ring { width: 18px; height: 18px; border: 2px solid #7b57d1; border-radius: 50%; display: inline-block; }
     table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
     th, td { border: 1px solid #2c2c54; padding: 4px 6px; vertical-align: top; }
-    th { background: #3b1b5a; color: #fff; text-align: left; }
+    th { background: #3b1b5a; color: #fff; text-align: left; font-weight: normal; }
     .label { background: #f1eaf7; color: #3b1b5a; }
+    .section-title { background: #3b1b5a; color: #fff; padding: 4px 6px; font-weight: normal; border: 1px solid #2c2c54; }
     .muted { color: #555; }
     .center { text-align: center; }
+    .circle { display: inline-block; width: 12px; height: 12px; border: 1px solid #2c2c54; border-radius: 50%; vertical-align: middle; margin: 0 4px; }
+    .circle.checked { background: #2c2c54; }
+    .box { border: 1px solid #2c2c54; min-height: 32px; }
+    .small { font-size: 8pt; line-height: 1.3; }
+    .arrow { height: 18px; border: 1px solid #7b57d1; position: relative; margin: 6px 0; }
+    .arrow:after { content: ''; position: absolute; right: -8px; top: -1px; width: 0; height: 0; border-top: 10px solid transparent; border-bottom: 10px solid transparent; border-left: 8px solid #7b57d1; }
+    .arrow-label { position: absolute; left: 6px; top: 2px; font-size: 8pt; color: #3b1b5a; }
   </style>
 </head>
 <body>
-  <h1>Financial Planning Questionnaire</h1>
-  <div class="header-line"></div>
+  <div class="page">
+    <div class="header">
+      <div>
+        <h1>Financial Planning Questionnaire</h1>
+        <div class="header-line"></div>
+      </div>
+      <div class="logo">
+        <span class="logo-ring"></span>
+        <div>
+          <div><strong>TITAN</strong> Wealth</div>
+          <div class="muted">International</div>
+        </div>
+      </div>
+    </div>
 
   <h2>Personal Details</h2>
   <table>
@@ -391,50 +418,54 @@ const FactfindExport = {
     <tr>
       <td class="label">Relationship Status</td>
       <td colspan="2">
-        ${checkbox(relationship(p.relationshipStatus, 'single'))} Single
-        ${checkbox(relationship(p.relationshipStatus, 'married'))} Married
-        ${checkbox(relationship(p.relationshipStatus, 'civil partner'))} Civil Partner
-        ${checkbox(relationship(p.relationshipStatus, 'divorced'))} Divorced
-        ${checkbox(relationship(p.relationshipStatus, 'widowed'))} Widowed
+        ${circle(relationship(p.relationshipStatus, 'single'))} Single
+        ${circle(relationship(p.relationshipStatus, 'married'))} Married
+        ${circle(relationship(p.relationshipStatus, 'civil partner'))} Civil Partner
+        ${circle(relationship(p.relationshipStatus, 'divorced'))} Divorced
+        ${circle(relationship(p.relationshipStatus, 'widowed'))} Widowed
       </td>
     </tr>
     <tr><td class="label">Address</td><td colspan="2">${formatAddress(p.address)}</td></tr>
   </table>
 
-  <h2>Employment</h2>
+  <div class="section-title">Employment Information</div>
   <table>
-    <tr><th class="label">Job Title</th><th>Employer</th><th class="label">Job Title</th><th>Employer</th></tr>
+    <tr><td class="label">Job Title</td><td>Employer</td><td class="label">Job Title</td><td>Employer</td></tr>
     <tr>
       <td>${emp.jobTitle || ''}</td>
       <td>${emp.employer || ''}</td>
       <td>${semp.jobTitle || ''}</td>
       <td>${semp.employer || ''}</td>
     </tr>
-    <tr><th class="label">Monthly Income</th><th>Monthly Surplus</th><th class="label">Monthly Income</th><th>Monthly Surplus</th></tr>
+    <tr><td class="label">Monthly Income</td><td>Monthly Surplus</td><td class="label">Monthly Income</td><td>Monthly Surplus</td></tr>
     <tr>
       <td>${currency(emp.monthlyGrossIncome, emp.incomeCurrency)}</td>
       <td>${currency(emp.monthlySurplus, emp.incomeCurrency)}</td>
       <td>${currency(semp.monthlyGrossIncome, semp.incomeCurrency)}</td>
       <td>${currency(semp.monthlySurplus, semp.incomeCurrency)}</td>
     </tr>
-    <tr><th class="label">Bonus Dates</th><th>Bonus Amount</th><th class="label">Bonus Dates</th><th>Bonus Amount</th></tr>
+    <tr><td class="label">Bonus Dates</td><td>Bonus Amount</td><td class="label">Bonus Dates</td><td>Bonus Amount</td></tr>
     <tr>
       <td>${emp.bonusDates || ''}</td>
       <td>${currency(emp.annualBonus, emp.incomeCurrency)}</td>
       <td>${semp.bonusDates || ''}</td>
       <td>${currency(semp.annualBonus, semp.incomeCurrency)}</td>
     </tr>
-    <tr><th class="label">Employment History</th><th colspan="3">Employment History</th></tr>
+    <tr><td class="label">Employment History</td><td colspan="3" class="label">Employment History</td></tr>
     <tr>
       <td colspan="2">${emp.notes || ''}</td>
       <td colspan="2">${semp.notes || ''}</td>
     </tr>
+    <tr>
+      <td class="label">Additional Benefits</td>
+      <td colspan="3">${emp.otherBenefits || ''}</td>
+    </tr>
   </table>
 
-  <h2>Children / Dependants</h2>
+  <div class="section-title">Child / Dependants</div>
   <table>
     <tr>
-      <th>Full Name</th><th>D.O.B.</th><th>Age</th><th>School/University</th><th>Annual Fees</th><th>Who Pays</th>
+      <td class="label">Full Name</td><td class="label">D.O.B.</td><td class="label">Age</td><td class="label">School/University</td><td class="label">Annual Fees</td><td class="label">Who Pays</td>
     </tr>
     ${childRow(0)}
     ${childRow(1)}
@@ -443,97 +474,115 @@ const FactfindExport = {
     ${childRow(4)}
   </table>
 
-  <h2>Protection</h2>
+  <div class="section-title">Protection</div>
   <table>
-    <tr><th>Insurance Provider</th><th>Type</th><th>Premium</th><th>Term</th><th>Cover Amount</th></tr>
+    <tr><td class="label">Insurance Provider</td><td class="label">Type</td><td class="label">Premium</td><td class="label">Term</td><td class="label">Cover Amount</td></tr>
     ${protectionRow(0)}
     ${protectionRow(1)}
     ${protectionRow(2)}
     <tr>
-      <td colspan="5">
-        Smoker (Client): ${checkbox(p.smoker === true)} Yes ${checkbox(p.smoker === false)} No
-        &nbsp;&nbsp;Good Health: ${checkbox(p.healthStatus === 'good')} Yes ${checkbox(p.healthStatus === 'poor')} No
+      <td colspan="5" class="label">
+        Smoker (Client): ${circle(p.smoker === true)} Yes ${circle(p.smoker === false)} No
+        &nbsp;&nbsp;Good Health: ${circle(p.healthStatus === 'good')} Yes ${circle(p.healthStatus === 'poor')} No
       </td>
     </tr>
     <tr>
-      <td colspan="5">
-        Smoker (Spouse): ${checkbox(s.smoker === true)} Yes ${checkbox(s.smoker === false)} No
-        &nbsp;&nbsp;Good Health: ${checkbox(s.healthStatus === 'good')} Yes ${checkbox(s.healthStatus === 'poor')} No
+      <td colspan="5" class="label">
+        Smoker (Spouse): ${circle(s.smoker === true)} Yes ${circle(s.smoker === false)} No
+        &nbsp;&nbsp;Good Health: ${circle(s.healthStatus === 'good')} Yes ${circle(s.healthStatus === 'poor')} No
       </td>
+    </tr>
+    <tr>
+      <td colspan="5" class="label">Do you have a Will? ${circle(p.willInPlace === true)} Yes ${circle(p.willInPlace === false)} No &nbsp;&nbsp;Executor: ${p.willDate || ''}</td>
     </tr>
   </table>
 
-  <h2>Bank Accounts</h2>
+  <div class="section-title">Corporate Services</div>
   <table>
-    <tr><th>Bank</th><th>Value</th><th>Currency</th><th>Interest</th></tr>
-    ${bankRow(0)}
-    ${bankRow(1)}
-    ${bankRow(2)}
-    ${bankRow(3)}
-    ${bankRow(4)}
-    ${bankRow(5)}
+    <tr><td class="label">Group Medical</td><td>${circle(false)} Yes ${circle(false)} No</td><td class="label">Provider:</td><td></td><td class="label">Expiry:</td><td></td></tr>
+    <tr><td class="label">Group Life Insurance</td><td>${circle(false)} Yes ${circle(false)} No</td><td class="label">Provider:</td><td></td><td class="label">Cover:</td><td></td></tr>
+    <tr><td class="label">Group Retirement Plan</td><td>${circle(false)} Yes ${circle(false)} No</td><td class="label">Provider:</td><td></td><td class="label">Contribution:</td><td></td></tr>
+    <tr><td class="label">Visa Expiry Date</td><td colspan="5"></td></tr>
   </table>
 
-  <h2>Investments</h2>
+  <div class="section-title">Bank Accounts</div>
   <table>
-    <tr><th>Provider</th><th>Value</th><th>Return</th><th>Additional Info</th></tr>
-    ${investRow(0)}
-    ${investRow(1)}
-    ${investRow(2)}
-    ${investRow(3)}
-    ${investRow(4)}
-    ${investRow(5)}
+    <tr><td class="label">Bank</td><td class="label">Value</td><td class="label">Currency</td><td class="label">Interest</td></tr>
+    ${bankRow(0)}${bankRow(1)}${bankRow(2)}${bankRow(3)}${bankRow(4)}${bankRow(5)}
   </table>
 
-  <h2>Pensions</h2>
+  <div class="section-title">Investments</div>
   <table>
-    <tr><th>Provider</th><th>Value</th><th>Type</th><th>Additional Info</th></tr>
-    ${pensionRow(0)}
-    ${pensionRow(1)}
-    ${pensionRow(2)}
-    ${pensionRow(3)}
-    ${pensionRow(4)}
-    ${pensionRow(5)}
+    <tr><td class="label">Provider</td><td class="label">Value</td><td class="label">Return</td><td class="label">Additional Info</td></tr>
+    ${investRow(0)}${investRow(1)}${investRow(2)}${investRow(3)}${investRow(4)}${investRow(5)}
   </table>
 
-  <h2>Properties</h2>
+  </div>
+
+  <div class="page-break"></div>
+  <div class="page">
+    <div class="header">
+      <div>
+        <div class="header-line"></div>
+      </div>
+      <div class="logo">
+        <span class="logo-ring"></span>
+        <div>
+          <div><strong>TITAN</strong> Wealth</div>
+          <div class="muted">International</div>
+        </div>
+      </div>
+    </div>
+
+  <div class="section-title">Pensions</div>
   <table>
-    <tr><th colspan="5">Property 1</th></tr>
+    <tr><td class="label">Provider</td><td class="label">Value</td><td class="label">Type</td><td class="label">Additional Info</td></tr>
+    ${pensionRow(0)}${pensionRow(1)}${pensionRow(2)}${pensionRow(3)}${pensionRow(4)}${pensionRow(5)}
+  </table>
+
+  <div class="section-title">Property</div>
+  <table>
+    <tr><td class="label">Location 1</td><td class="label">Price Paid</td><td class="label">Current Value</td><td class="label">Purchase Date</td><td class="label">Outstanding Mortgage</td></tr>
     ${propertyRow(0)}
   </table>
   <table>
-    <tr><th colspan="5">Property 2</th></tr>
+    <tr><td class="label">Location 2</td><td class="label">Price Paid</td><td class="label">Current Value</td><td class="label">Purchase Date</td><td class="label">Outstanding Mortgage</td></tr>
     ${propertyRow(1)}
   </table>
   <table>
-    <tr><th colspan="5">Property 3</th></tr>
+    <tr><td class="label">Location 3</td><td class="label">Price Paid</td><td class="label">Current Value</td><td class="label">Purchase Date</td><td class="label">Outstanding Mortgage</td></tr>
     ${propertyRow(2)}
   </table>
   <table>
-    <tr><th colspan="5">Property 4</th></tr>
+    <tr><td class="label">Location 4</td><td class="label">Price Paid</td><td class="label">Current Value</td><td class="label">Purchase Date</td><td class="label">Outstanding Mortgage</td></tr>
     ${propertyRow(3)}
   </table>
   <table>
-    <tr><th colspan="5">Property 5</th></tr>
+    <tr><td class="label">Location 5</td><td class="label">Price Paid</td><td class="label">Current Value</td><td class="label">Purchase Date</td><td class="label">Outstanding Mortgage</td></tr>
     ${propertyRow(4)}
   </table>
 
-  <h2>Debt</h2>
+  <div class="section-title">Debt</div>
   <table>
-    <tr><th>Provider</th><th>Value</th><th>Repayments</th><th>Additional Information</th></tr>
-    ${debtRow(0)}
-    ${debtRow(1)}
-    ${debtRow(2)}
-    ${debtRow(3)}
+    <tr><td class="label">Provider</td><td class="label">Value</td><td class="label">Repayments</td><td class="label">Additional Information</td></tr>
+    ${debtRow(0)}${debtRow(1)}${debtRow(2)}${debtRow(3)}
   </table>
 
-  <h2>Estate Planning</h2>
+  <div class="section-title">Estate Planning</div>
   <table>
-    <tr><th>Trust Details</th><th>Will Details</th></tr>
+    <tr><td class="label">Total Net Worth</td><td class="label">Potential IHT / Estate Duty</td></tr>
+    <tr><td></td><td></td></tr>
+    <tr><td class="label">Trust Details</td><td class="label">Will Details</td></tr>
     <tr><td>${client.estatePlanning?.trustDetails || ''}</td><td>${client.estatePlanning?.willLocation || ''}</td></tr>
   </table>
 
-  <h2>Expenditure</h2>
+  <div class="section-title">Tax Return</div>
+  <table>
+    <tr><td class="label">Refer to ATC</td><td>${circle(false)} Yes ${circle(false)} No</td></tr>
+    <tr><td class="label">Notes</td><td></td></tr>
+  </table>
+
+  <div class="section-title">Expenditure</div>
   <table>
     <tr><th></th><th>Current Expenditure</th><th>Retirement Expenditure</th><th>On First Death</th><th>Is This Essential?</th></tr>
     <tr><td>Mortgage / Rent</td><td>${currency(exp.mortgage, exp.currency)}</td><td></td><td></td><td></td></tr>
@@ -549,6 +598,56 @@ const FactfindExport = {
     <tr><td>Other</td><td>${currency(exp.other, exp.currency)}</td><td></td><td></td><td></td></tr>
     <tr><td>Total</td><td>${currency(exp.totalMonthly, exp.currency)}</td><td></td><td></td><td></td></tr>
   </table>
+  </div>
+
+  <div class="page-break"></div>
+  <div class="page">
+    <div class="header">
+      <div>
+        <div class="header-line"></div>
+      </div>
+      <div class="logo">
+        <span class="logo-ring"></span>
+        <div>
+          <div><strong>TITAN</strong> Wealth</div>
+          <div class="muted">International</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Required Features</div>
+    <div class="box" style="height: 70px;"></div>
+
+    <h2>What's your attitude to risk?</h2>
+    <table>
+      <tr>
+        <td class="center">1<br>${circle(false)}</td>
+        <td class="center">2<br>${circle(false)}</td>
+        <td class="center">3<br>${circle(false)}</td>
+        <td class="center">4<br>${circle(false)}</td>
+        <td class="center">5<br>${circle(false)}</td>
+      </tr>
+    </table>
+    <div class="muted">Low<span style="float:right;">High</span></div>
+
+    <div class="section-title" style="margin-top:10px;">What is the value of money to you?</div>
+    <div class="box" style="height: 40px;"></div>
+
+    <div class="section-title" style="margin-top:10px;">Short/Medium/Long Term Plans</div>
+    <div class="arrow"><div class="arrow-label">5 Years</div></div>
+    <div class="arrow"><div class="arrow-label">10 Years</div></div>
+    <div class="arrow"><div class="arrow-label">15 Years</div></div>
+    <div class="arrow"><div class="arrow-label">Retirement Age:</div></div>
+    <div class="arrow"><div class="arrow-label">Future Residential Plans:</div></div>
+
+    <h2>Financial Goals & Objectives</h2>
+    <table>
+      <tr><td class="label">Priorities</td><td class="label">Retirement</td></tr>
+      <tr><td class="box" style="height:140px;"></td><td class="box" style="height:140px;"></td></tr>
+      <tr><td class="label">Milestone</td><td class="label">Milestone</td></tr>
+      <tr><td class="box" style="height:60px;"></td><td class="box" style="height:60px;"></td></tr>
+    </table>
+  </div>
 </body>
 </html>`;
     },
