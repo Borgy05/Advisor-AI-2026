@@ -70,10 +70,14 @@ const FactfindExport = {
             // 6. Apply all mappings
             const allMappings = FactfindMapping.getAllMappings();
             let fieldsPopulated = 0;
+            let fieldsWithValues = 0;
+            let tablesFound = tables ? tables.length : 0;
+            const debugSamples = [];
 
             for (const mapping of allMappings) {
                 const value = FactfindMapping.resolveField(client, mapping.field);
                 if (value === null || value === undefined || value === '') continue;
+                fieldsWithValues++;
 
                 const formattedValue = FactfindMapping.formatValue(value, mapping.format);
                 if (!formattedValue) continue;
@@ -83,7 +87,31 @@ const FactfindExport = {
 
                 const success = this.setCellText(table, mapping.row, mapping.col, formattedValue, ns);
                 if (success) fieldsPopulated++;
+
+                if (debugSamples.length < 5) {
+                    debugSamples.push({
+                        field: mapping.field,
+                        value: formattedValue,
+                        table: mapping.table,
+                        row: mapping.row,
+                        col: mapping.col,
+                        success
+                    });
+                }
             }
+
+            console.log('[FactfindExport] tables found:', tablesFound);
+            console.log('[FactfindExport] mappings total:', allMappings.length);
+            console.log('[FactfindExport] fields with values:', fieldsWithValues);
+            console.log('[FactfindExport] fields populated:', fieldsPopulated);
+            console.log('[FactfindExport] sample mappings:', debugSamples);
+
+            this.showDebugOverlay({
+                tablesFound,
+                mappingsTotal: allMappings.length,
+                fieldsWithValues,
+                fieldsPopulated
+            });
 
             // 7. Serialize back to XML string
             const serializer = new XMLSerializer();
@@ -116,6 +144,31 @@ const FactfindExport = {
         } catch (error) {
             console.error('Factfind export error:', error);
             App.showAlert('Factfind export failed: ' + error.message, 'danger');
+        }
+    },
+
+    showDebugOverlay: function(stats) {
+        try {
+            let el = document.getElementById('factfind-debug-overlay');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'factfind-debug-overlay';
+                el.style.position = 'fixed';
+                el.style.bottom = '16px';
+                el.style.right = '16px';
+                el.style.zIndex = '99999';
+                el.style.background = 'rgba(0,0,0,0.8)';
+                el.style.color = '#fff';
+                el.style.padding = '10px 12px';
+                el.style.borderRadius = '6px';
+                el.style.fontSize = '12px';
+                el.style.fontFamily = 'Arial, sans-serif';
+                el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.35)';
+                document.body.appendChild(el);
+            }
+            el.textContent = `Factfind debug: tables=${stats.tablesFound}, mappings=${stats.mappingsTotal}, values=${stats.fieldsWithValues}, populated=${stats.fieldsPopulated}`;
+        } catch (e) {
+            // no-op for debug overlay
         }
     },
 
