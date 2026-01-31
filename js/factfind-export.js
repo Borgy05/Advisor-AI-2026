@@ -203,7 +203,7 @@ const FactfindExport = {
             const PAGE_W = 595.28;
             const PAGE_H = 841.89;
             const margin = 36;
-            const rowH = 18;
+            const rowH = 20;
 
             const addPageHeader = (page) => {
                 page.drawText('Financial Planning Questionnaire', {
@@ -230,7 +230,7 @@ const FactfindExport = {
                     color: rgb(0.23, 0.1, 0.35)
                 });
                 page.drawText(title, { x: margin + 6, y: y - 11, size: 9, font, color: rgb(1, 1, 1) });
-                return y - 20;
+                return y - 28;
             };
 
             const addTextField = (page, name, x, y, w, h, value) => {
@@ -286,10 +286,24 @@ const FactfindExport = {
 
             const addr = (a) => a ? [a.line1, a.line2, a.city, a.state, a.postcode, a.country].filter(Boolean).join(', ') : '';
 
+            const newPage = () => {
+                const p = pdfDoc.addPage([PAGE_W, PAGE_H]);
+                addPageHeader(p);
+                return { page: p, y: PAGE_H - margin - 34 };
+            };
+
+            const ensureSpace = (state, needed) => {
+                if (state.y - needed < margin + 40) {
+                    const next = newPage();
+                    state.page = next.page;
+                    state.y = next.y;
+                }
+            };
+
             // Page 1
-            let page = pdfDoc.addPage([PAGE_W, PAGE_H]);
-            addPageHeader(page);
-            let y = PAGE_H - margin - 30;
+            let state = newPage();
+            let page = state.page;
+            let y = state.y;
 
             y = addSectionTitle(page, y, 'Personal Details');
             addLabel(page, 'Client', margin + 140, y + 2);
@@ -316,6 +330,10 @@ const FactfindExport = {
             addTextField(page, 'personal.address', margin + 120, y, 370, 28, addr(p.address));
             y -= rowH + 12;
 
+            ensureSpace(state, 140);
+            page = state.page;
+            y = state.y;
+
             y = addSectionTitle(page, y, 'Employment Information');
             addLabel(page, 'Client', margin + 120, y + 2);
             addLabel(page, 'Spouse/Partner', margin + 320, y + 2);
@@ -327,9 +345,9 @@ const FactfindExport = {
             twoColRow('Bonus Amount', currency(emp.annualBonus, emp.incomeCurrency), currency(semp.annualBonus, semp.incomeCurrency), 'employment.annualBonus', 'spouseEmployment.annualBonus');
 
             // Page 2
-            page = pdfDoc.addPage([PAGE_W, PAGE_H]);
-            addPageHeader(page);
-            y = PAGE_H - margin - 30;
+            state = newPage();
+            page = state.page;
+            y = state.y;
 
             y = addSectionTitle(page, y, 'Bank Accounts');
             addLabel(page, 'Bank', margin, y + 4);
@@ -377,9 +395,9 @@ const FactfindExport = {
             }
 
             // Page 3
-            page = pdfDoc.addPage([PAGE_W, PAGE_H]);
-            addPageHeader(page);
-            y = PAGE_H - margin - 30;
+            state = newPage();
+            page = state.page;
+            y = state.y;
 
             y = addSectionTitle(page, y, 'Properties');
             for (let i = 0; i < 5; i++) {
@@ -435,6 +453,10 @@ const FactfindExport = {
             expRow('Hobbies / Eating Out', exp.entertainment, 'expenditure.entertainment');
             expRow('Other', exp.other, 'expenditure.other');
             expRow('Total', exp.totalMonthly, 'expenditure.totalMonthly');
+
+            ensureSpace(state, 220);
+            page = state.page;
+            y = state.y;
 
             y = addSectionTitle(page, y, 'Goals & Risk');
             addLabel(page, 'Short Term Goals', margin, y + 4);
