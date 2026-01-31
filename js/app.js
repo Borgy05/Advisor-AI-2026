@@ -146,8 +146,9 @@ const App = {
 
         // Load saved API key
         const savedKey = Extraction.getApiKey();
-        if (savedKey) {
-            document.getElementById('apiKey').value = savedKey;
+        const apiKeyEl = document.getElementById('apiKey');
+        if (savedKey && apiKeyEl) {
+            apiKeyEl.value = savedKey;
         }
     },
 
