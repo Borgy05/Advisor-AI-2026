@@ -295,7 +295,8 @@ const App = {
         // Export Factfind button
         document.getElementById('btnExportFactfind')?.addEventListener('click', () => {
             if (this.currentClient) {
-                FactfindExport.exportForClient(this.currentClient);
+                // Use HTML-based export (Word-compatible) to avoid template mapping issues
+                FactfindExport.exportAsHtmlDoc(this.currentClient);
             }
         });
     },

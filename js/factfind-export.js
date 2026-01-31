@@ -147,6 +147,183 @@ const FactfindExport = {
         }
     },
 
+    /**
+     * Export a factfind as a Word-compatible HTML .doc
+     * This avoids .docx XML table mapping issues.
+     */
+    exportAsHtmlDoc: function(client) {
+        try {
+            const html = this.buildHtmlFactfind(client);
+            const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+            const clientName = `${client.personal?.firstName || 'Unknown'}_${client.personal?.lastName || 'Client'}`.replace(/\s+/g, '_');
+            const fileName = `Factfind_${clientName}_${new Date().toISOString().split('T')[0]}.doc`;
+
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            App.showAlert('Factfind exported (HTML Word)', 'success');
+        } catch (error) {
+            console.error('Factfind HTML export error:', error);
+            App.showAlert('Factfind HTML export failed: ' + error.message, 'danger');
+        }
+    },
+
+    buildHtmlFactfind: function(client) {
+        const formatDate = (val) => {
+            if (!val) return '';
+            const d = new Date(val);
+            if (isNaN(d)) return String(val);
+            return d.toLocaleDateString('en-GB');
+        };
+
+        const formatCurrency = (val) => {
+            if (val === null || val === undefined || val === '') return '';
+            const num = parseFloat(val);
+            if (isNaN(num)) return String(val);
+            return num.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        };
+
+        const fullName = (person) => {
+            if (!person) return '';
+            const first = person.preferredName || person.firstName || '';
+            const last = person.lastName || '';
+            return `${first} ${last}`.trim();
+        };
+
+        const formatAddress = (addr) => {
+            if (!addr) return '';
+            const parts = [addr.line1, addr.line2, addr.city, addr.state, addr.postcode, addr.country].filter(Boolean);
+            return parts.join(', ');
+        };
+
+        const p = client.personal || {};
+        const s = client.spouse || {};
+        const emp = client.employment || {};
+        const semp = client.spouseEmployment || {};
+        const goals = client.goals || {};
+        const risk = client.riskAttitude || {};
+        const exp = client.expenditure || {};
+
+        const childrenRows = (client.children || []).map((c, i) => `
+            <tr>
+                <td>${i + 1}</td>
+                <td>${fullName(c)}</td>
+                <td>${formatDate(c.dateOfBirth)}</td>
+                <td>${c.age ?? ''}</td>
+                <td>${c.school || ''}</td>
+                <td>${formatCurrency(c.annualSchoolFees)}</td>
+            </tr>
+        `).join('');
+
+        const pensionRows = (client.pensions || []).map((p, i) => `
+            <tr>
+                <td>${i + 1}</td>
+                <td>${p.provider || ''}</td>
+                <td>${formatCurrency(p.currentValue)}</td>
+                <td>${p.type || ''}</td>
+            </tr>
+        `).join('');
+
+        const propertyRows = (client.properties || []).map((p, i) => `
+            <tr>
+                <td>${i + 1}</td>
+                <td>${formatAddress(p.address)}</td>
+                <td>${formatCurrency(p.purchasePrice)}</td>
+                <td>${formatCurrency(p.currentValue)}</td>
+                <td>${formatDate(p.purchaseDate)}</td>
+                <td>${formatCurrency(p.mortgageBalance)}</td>
+            </tr>
+        `).join('');
+
+        return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Factfind</title>
+  <style>
+    body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; color: #111; }
+    h1 { font-size: 18pt; margin: 0 0 10px 0; }
+    h2 { font-size: 13pt; margin: 16px 0 6px 0; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
+    th, td { border: 1px solid #999; padding: 4px 6px; vertical-align: top; }
+    th { background: #f2f2f2; text-align: left; }
+    .muted { color: #555; }
+  </style>
+</head>
+<body>
+  <h1>Financial Planning Questionnaire</h1>
+  <div class="muted">Exported: ${new Date().toLocaleString('en-GB')}</div>
+
+  <h2>Personal Details</h2>
+  <table>
+    <tr><th></th><th>Client</th><th>Spouse/Partner</th></tr>
+    <tr><td>Name</td><td>${fullName(p)}</td><td>${fullName(s)}</td></tr>
+    <tr><td>DOB</td><td>${formatDate(p.dateOfBirth)}</td><td>${formatDate(s.dateOfBirth)}</td></tr>
+    <tr><td>Age</td><td>${p.age ?? ''}</td><td>${s.age ?? ''}</td></tr>
+    <tr><td>Country of Residence</td><td>${p.countryOfResidence || ''}</td><td>${s.countryOfResidence || ''}</td></tr>
+    <tr><td>Nationality</td><td>${p.nationality || ''}</td><td>${s.nationality || ''}</td></tr>
+    <tr><td>Email</td><td>${p.email || ''}</td><td>${s.email || ''}</td></tr>
+    <tr><td>Phone (Home)</td><td>${p.phoneHome || ''}</td><td>${s.phoneHome || ''}</td></tr>
+    <tr><td>Phone (Mobile)</td><td>${p.phoneMobile || ''}</td><td>${s.phoneMobile || ''}</td></tr>
+    <tr><td>Address</td><td colspan="2">${formatAddress(p.address)}</td></tr>
+  </table>
+
+  <h2>Employment</h2>
+  <table>
+    <tr><th></th><th>Client</th><th>Spouse/Partner</th></tr>
+    <tr><td>Status</td><td>${emp.status || ''}</td><td>${semp.status || ''}</td></tr>
+    <tr><td>Job Title</td><td>${emp.jobTitle || ''}</td><td>${semp.jobTitle || ''}</td></tr>
+    <tr><td>Employer</td><td>${emp.employer || ''}</td><td>${semp.employer || ''}</td></tr>
+    <tr><td>Monthly Gross Income</td><td>${formatCurrency(emp.monthlyGrossIncome)}</td><td>${formatCurrency(semp.monthlyGrossIncome)}</td></tr>
+    <tr><td>Retirement Age</td><td>${emp.retirementAge ?? ''}</td><td>${semp.retirementAge ?? ''}</td></tr>
+  </table>
+
+  <h2>Children / Dependants</h2>
+  <table>
+    <tr><th>#</th><th>Name</th><th>DOB</th><th>Age</th><th>School</th><th>Annual Fees</th></tr>
+    ${childrenRows || '<tr><td colspan="6">None</td></tr>'}
+  </table>
+
+  <h2>Pensions</h2>
+  <table>
+    <tr><th>#</th><th>Provider</th><th>Value</th><th>Type</th></tr>
+    ${pensionRows || '<tr><td colspan="4">None</td></tr>'}
+  </table>
+
+  <h2>Properties</h2>
+  <table>
+    <tr><th>#</th><th>Location</th><th>Purchase Price</th><th>Current Value</th><th>Purchase Date</th><th>Mortgage Balance</th></tr>
+    ${propertyRows || '<tr><td colspan="6">None</td></tr>'}
+  </table>
+
+  <h2>Goals & Risk</h2>
+  <table>
+    <tr><td>Short Term Goals</td><td>${goals.shortTerm || ''}</td></tr>
+    <tr><td>Medium Term Goals</td><td>${goals.mediumTerm || ''}</td></tr>
+    <tr><td>Long Term Goals</td><td>${goals.longTerm || ''}</td></tr>
+    <tr><td>Retirement Age</td><td>${goals.retirementAge ?? ''}</td></tr>
+    <tr><td>Risk Tolerance</td><td>${risk.riskTolerance ?? ''}</td></tr>
+  </table>
+
+  <h2>Expenditure (Monthly)</h2>
+  <table>
+    <tr><td>Mortgage / Rent</td><td>${formatCurrency(exp.mortgage)}</td></tr>
+    <tr><td>Loans / Credit Cards</td><td>${formatCurrency(exp.loans)}</td></tr>
+    <tr><td>Utilities</td><td>${formatCurrency(exp.utilities)}</td></tr>
+    <tr><td>Food</td><td>${formatCurrency(exp.food)}</td></tr>
+    <tr><td>Transport</td><td>${formatCurrency(exp.transport)}</td></tr>
+    <tr><td>Insurance</td><td>${formatCurrency(exp.insurance)}</td></tr>
+    <tr><td>Savings</td><td>${formatCurrency(exp.savings)}</td></tr>
+    <tr><td>Other</td><td>${formatCurrency(exp.other)}</td></tr>
+  </table>
+</body>
+</html>`;
+    },
+
     showDebugOverlay: function(stats) {
         try {
             let el = document.getElementById('factfind-debug-overlay');
