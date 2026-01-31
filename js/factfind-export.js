@@ -18,6 +18,15 @@ const FactfindExport = {
 
     TEMPLATE_PATH: 'TWI - Factfind Word template.docx',
 
+    getTemplateUrl: function() {
+        const encoded = encodeURI(this.TEMPLATE_PATH);
+        // Prefer same-origin (GitHub Pages will serve from repo root)
+        const sameOriginUrl = encoded;
+        // Fallback to raw GitHub URL (useful if Pages doesn't serve the .docx correctly)
+        const rawUrl = 'https://raw.githubusercontent.com/Borgy05/Advisor-AI-2026/main/' + encoded;
+        return { sameOriginUrl, rawUrl };
+    },
+
     /**
      * Export a client's data to a populated factfind Word document
      */
@@ -25,10 +34,24 @@ const FactfindExport = {
         try {
             App.showAlert('Generating factfind document...', 'info');
 
-            // 1. Fetch the template
-            const response = await fetch(this.TEMPLATE_PATH);
+            // 1. Fetch the template (try same-origin first, then fallback)
+            const { sameOriginUrl, rawUrl } = this.getTemplateUrl();
+            let response = await fetch(sameOriginUrl, { cache: 'no-store' });
+            if (!response.ok) {
+                response = await fetch(rawUrl, { cache: 'no-store' });
+            }
             if (!response.ok) throw new Error('Could not load factfind template');
             const templateBlob = await response.arrayBuffer();
+
+            // Detect Git LFS pointer (Pages/Raw can return pointer text)
+            try {
+                const head = new TextDecoder().decode(templateBlob.slice(0, 200));
+                if (head.includes('git-lfs') && head.includes('oid sha256')) {
+                    throw new Error('Template file is a Git LFS pointer. Please publish the actual .docx in the repo.');
+                }
+            } catch (e) {
+                // If TextDecoder fails, continue
+            }
 
             // 2. Unzip
             const zip = await JSZip.loadAsync(templateBlob);
