@@ -183,6 +183,10 @@ const App = {
             }).join('');
         } catch (error) {
             console.error('Failed to load clients:', error);
+            const listContainer = document.getElementById('clientList');
+            if (listContainer) {
+                listContainer.innerHTML = '<div class="empty-state">No clients yet.<br>Click "Add Client" to get started.</div>';
+            }
         }
     },
 
