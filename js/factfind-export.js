@@ -204,6 +204,7 @@ const FactfindExport = {
             const PAGE_H = 841.89;
             const margin = 36;
             const rowH = 20;
+            const sectionGap = 8;
 
             const addPageHeader = (page) => {
                 page.drawText('Financial Planning Questionnaire', {
@@ -300,12 +301,21 @@ const FactfindExport = {
                 }
             };
 
+            const startSection = (state, title, needed = 80) => {
+                ensureSpace(state, needed);
+                const nextY = addSectionTitle(state.page, state.y, title) - sectionGap;
+                state.y = nextY;
+                return state;
+            };
+
             // Page 1
             let state = newPage();
             let page = state.page;
             let y = state.y;
 
-            y = addSectionTitle(page, y, 'Personal Details');
+            state = startSection(state, 'Personal Details', 180);
+            page = state.page;
+            y = state.y;
             addLabel(page, 'Client', margin + 140, y + 2);
             addLabel(page, 'Spouse/Partner', margin + 330, y + 2);
             y -= rowH;
@@ -330,11 +340,9 @@ const FactfindExport = {
             addTextField(page, 'personal.address', margin + 120, y, 370, 28, addr(p.address));
             y -= rowH + 12;
 
-            ensureSpace(state, 140);
+            state = startSection(state, 'Employment Information', 160);
             page = state.page;
             y = state.y;
-
-            y = addSectionTitle(page, y, 'Employment Information');
             addLabel(page, 'Client', margin + 120, y + 2);
             addLabel(page, 'Spouse/Partner', margin + 320, y + 2);
             y -= rowH;
@@ -349,7 +357,9 @@ const FactfindExport = {
             page = state.page;
             y = state.y;
 
-            y = addSectionTitle(page, y, 'Bank Accounts');
+            state = startSection(state, 'Bank Accounts', 180);
+            page = state.page;
+            y = state.y;
             addLabel(page, 'Bank', margin, y + 4);
             addLabel(page, 'Value', margin + 200, y + 4);
             addLabel(page, 'Currency', margin + 300, y + 4);
@@ -364,7 +374,9 @@ const FactfindExport = {
                 y -= rowH;
             }
 
-            y = addSectionTitle(page, y, 'Investments');
+            state = startSection(state, 'Investments', 180);
+            page = state.page;
+            y = state.y;
             addLabel(page, 'Provider', margin, y + 4);
             addLabel(page, 'Value', margin + 200, y + 4);
             addLabel(page, 'Return', margin + 300, y + 4);
@@ -379,7 +391,9 @@ const FactfindExport = {
                 y -= rowH;
             }
 
-            y = addSectionTitle(page, y, 'Pensions');
+            state = startSection(state, 'Pensions', 180);
+            page = state.page;
+            y = state.y;
             addLabel(page, 'Provider', margin, y + 4);
             addLabel(page, 'Value', margin + 200, y + 4);
             addLabel(page, 'Type', margin + 300, y + 4);
@@ -399,20 +413,32 @@ const FactfindExport = {
             page = state.page;
             y = state.y;
 
-            y = addSectionTitle(page, y, 'Properties');
+            state = startSection(state, 'Properties', 260);
+            page = state.page;
+            y = state.y;
             for (let i = 0; i < 5; i++) {
+                ensureSpace(state, 48);
+                page = state.page;
+                y = state.y;
                 const pr = (client.properties || [])[i] || {};
                 addLabel(page, `Location ${i + 1}`, margin, y + 4);
                 addTextField(page, `properties[${i}].address`, margin + 120, y, 370, 14, addr(pr.address));
                 y -= rowH;
+                state.y = y;
+                ensureSpace(state, 24);
+                page = state.page;
+                y = state.y;
                 addTextField(page, `properties[${i}].purchasePrice`, margin, y, 110, 14, currency(pr.purchasePrice, pr.currency));
                 addTextField(page, `properties[${i}].currentValue`, margin + 120, y, 110, 14, currency(pr.currentValue, pr.currency));
                 addTextField(page, `properties[${i}].purchaseDate`, margin + 240, y, 110, 14, formatDate(pr.purchaseDate));
                 addTextField(page, `properties[${i}].mortgageBalance`, margin + 360, y, 110, 14, currency(pr.mortgageBalance, pr.currency));
                 y -= rowH;
+                state.y = y;
             }
 
-            y = addSectionTitle(page, y, 'Debt');
+            state = startSection(state, 'Debt', 120);
+            page = state.page;
+            y = state.y;
             addLabel(page, 'Provider', margin, y + 4);
             addLabel(page, 'Value', margin + 200, y + 4);
             addLabel(page, 'Repayments', margin + 300, y + 4);
@@ -427,7 +453,9 @@ const FactfindExport = {
                 y -= rowH;
             }
 
-            y = addSectionTitle(page, y, 'Estate Planning');
+            state = startSection(state, 'Estate Planning', 120);
+            page = state.page;
+            y = state.y;
             addLabel(page, 'Trust Details', margin, y + 4);
             addTextField(page, 'estatePlanning.trustDetails', margin + 120, y, 370, 28, client.estatePlanning?.trustDetails || '');
             y -= rowH + 12;
@@ -435,7 +463,9 @@ const FactfindExport = {
             addTextField(page, 'estatePlanning.willLocation', margin + 120, y, 370, 28, client.estatePlanning?.willLocation || '');
             y -= rowH + 12;
 
-            y = addSectionTitle(page, y, 'Expenditure');
+            state = startSection(state, 'Expenditure', 200);
+            page = state.page;
+            y = state.y;
             const expRow = (label, value, name) => {
                 addLabel(page, label, margin, y + 4);
                 addTextField(page, name, margin + 200, y, 120, 14, currency(value, exp.currency));
@@ -454,11 +484,9 @@ const FactfindExport = {
             expRow('Other', exp.other, 'expenditure.other');
             expRow('Total', exp.totalMonthly, 'expenditure.totalMonthly');
 
-            ensureSpace(state, 220);
+            state = startSection(state, 'Goals & Risk', 200);
             page = state.page;
             y = state.y;
-
-            y = addSectionTitle(page, y, 'Goals & Risk');
             addLabel(page, 'Short Term Goals', margin, y + 4);
             addTextField(page, 'goals.shortTerm', margin + 200, y, 280, 28, goals.shortTerm || '');
             y -= rowH + 12;
