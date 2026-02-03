@@ -114,7 +114,7 @@ const BatchProcessor = {
                             { role: 'system', content: systemPrompt },
                             { role: 'user', content: transcriptText.substring(0, 3000) }
                         ],
-                        text: { format: 'json' },
+                        text: { format: { type: 'json' } },
                         max_output_tokens: 512
                     })
                     : JSON.stringify({

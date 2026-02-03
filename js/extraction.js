@@ -101,7 +101,7 @@ const Extraction = {
                             { role: 'system', content: systemPrompt },
                             { role: 'user', content: userPrompt }
                         ],
-                        text: { format: 'json' },
+                        text: { format: { type: 'json' } },
                         max_output_tokens: 4096
                     })
                     : JSON.stringify({
@@ -194,7 +194,7 @@ ${transcriptText}
                         { role: 'system', content: systemPrompt },
                         { role: 'user', content: userPrompt }
                     ],
-                    text: { format: 'json' },
+                    text: { format: { type: 'json' } },
                     max_output_tokens: 4096
                 })
                 : JSON.stringify({

@@ -768,9 +768,12 @@ const App = {
                     </div>
                     <div class="form-group">
                         <label for="model">Model</label>
-                        <input type="text" id="model" class="form-control"
-                               placeholder="claude-opus-4-20250514 or gpt-4o"
-                               value="${model}">
+                        <select id="model" class="form-control">
+                            <option value="gpt-4o" ${model === 'gpt-4o' ? 'selected' : ''}>OpenAI: gpt-4o</option>
+                            <option value="gpt-4.1" ${model === 'gpt-4.1' ? 'selected' : ''}>OpenAI: gpt-4.1</option>
+                            <option value="claude-opus-4-20250514" ${model === 'claude-opus-4-20250514' ? 'selected' : ''}>Claude: opus-4</option>
+                            <option value="claude-sonnet-4-20250514" ${model === 'claude-sonnet-4-20250514' ? 'selected' : ''}>Claude: sonnet-4</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="apiKeyClaude">Claude API Key</label>
