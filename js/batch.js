@@ -86,6 +86,8 @@ const BatchProcessor = {
     // Extract client name from transcript using Claude API (lightweight call)
     extractClientName: async function(transcriptText) {
         const apiKey = Extraction.getApiKey();
+        const provider = Extraction.getProvider();
+        const model = Extraction.getModel();
 
         if (!apiKey) {
             // Demo mode - try to parse name from text
@@ -93,28 +95,44 @@ const BatchProcessor = {
         }
 
         try {
-            const response = await fetch(Extraction.API_URL, {
+            const systemPrompt = 'Extract the PRIMARY CLIENT name (not the adviser) from this meeting transcript. Return ONLY a JSON object: {"firstName": "...", "lastName": "...", "meetingDate": "YYYY-MM-DD or null"}. No explanation.';
+            const response = await fetch(Extraction.API_URLS[provider], {
                 method: 'POST',
-                headers: {
+                headers: provider === 'openai' ? {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                } : {
                     'Content-Type': 'application/json',
                     'x-api-key': apiKey,
                     'anthropic-version': '2023-06-01',
                     'anthropic-dangerous-direct-browser-access': 'true'
                 },
-                body: JSON.stringify({
-                    model: 'claude-sonnet-4-20250514',
-                    max_tokens: 256,
-                    system: 'Extract the PRIMARY CLIENT name (not the adviser) from this meeting transcript. Return ONLY a JSON object: {"firstName": "...", "lastName": "...", "meetingDate": "YYYY-MM-DD or null"}. No explanation.',
-                    messages: [
-                        { role: 'user', content: transcriptText.substring(0, 3000) }
-                    ]
-                })
+                body: provider === 'openai'
+                    ? JSON.stringify({
+                        model: model || 'gpt-4o',
+                        input: [
+                            { role: 'system', content: systemPrompt },
+                            { role: 'user', content: transcriptText.substring(0, 3000) }
+                        ],
+                        response_format: { type: 'json_object' },
+                        max_output_tokens: 512
+                    })
+                    : JSON.stringify({
+                        model: model || 'claude-opus-4-20250514',
+                        max_tokens: 256,
+                        system: systemPrompt,
+                        messages: [
+                            { role: 'user', content: transcriptText.substring(0, 3000) }
+                        ]
+                    })
             });
 
             if (!response.ok) throw new Error('API request failed');
 
             const data = await response.json();
-            let jsonStr = data.content[0].text.trim();
+            let jsonStr = provider === 'openai'
+                ? (data.output?.[0]?.content?.[0]?.text || '').trim()
+                : (data.content?.[0]?.text || '').trim();
             const jsonMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
             if (jsonMatch) jsonStr = jsonMatch[1].trim();
 

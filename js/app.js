@@ -144,12 +144,7 @@ const App = {
             this.deleteCurrentClient();
         });
 
-        // Load saved API key
-        const savedKey = Extraction.getApiKey();
-        const apiKeyEl = document.getElementById('apiKey');
-        if (savedKey && apiKeyEl) {
-            apiKeyEl.value = savedKey;
-        }
+        // API settings are loaded in Settings tab
     },
 
     // Load and display client list
@@ -748,18 +743,40 @@ const App = {
 
     // Render settings tab
     renderSettingsTab: function() {
-        const apiKey = Extraction.getApiKey() || '';
+        const provider = Extraction.getProvider();
+        const apiKeyClaude = localStorage.getItem('adviserAI_apiKey_claude') || '';
+        const apiKeyOpenAI = localStorage.getItem('adviserAI_apiKey_openai') || '';
+        const model = Extraction.getModel() || '';
         return `
             <div class="card">
                 <div class="card-header">API Settings</div>
                 <div class="card-body">
                     <div class="form-group">
-                        <label for="apiKey">Claude API Key</label>
-                        <input type="password" id="apiKey" class="form-control"
+                        <label for="provider">LLM Provider</label>
+                        <select id="provider" class="form-control">
+                            <option value="claude" ${provider === 'claude' ? 'selected' : ''}>Claude (Anthropic)</option>
+                            <option value="openai" ${provider === 'openai' ? 'selected' : ''}>OpenAI (GPT-4o)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="model">Model</label>
+                        <input type="text" id="model" class="form-control"
+                               placeholder="claude-opus-4-20250514 or gpt-4o"
+                               value="${model}">
+                    </div>
+                    <div class="form-group">
+                        <label for="apiKeyClaude">Claude API Key</label>
+                        <input type="password" id="apiKeyClaude" class="form-control"
                                placeholder="sk-ant-..."
-                               value="${apiKey}">
+                               value="${apiKeyClaude}">
+                    </div>
+                    <div class="form-group">
+                        <label for="apiKeyOpenAI">OpenAI API Key</label>
+                        <input type="password" id="apiKeyOpenAI" class="form-control"
+                               placeholder="sk-..."
+                               value="${apiKeyOpenAI}">
                         <p style="margin-top: 8px; font-size: 0.8rem; color: var(--text-secondary);">
-                            Your API key is stored locally and never sent to any server except Anthropic's API.
+                            Keys are stored locally and only sent to the selected provider.
                         </p>
                     </div>
                     <button class="btn btn-primary" id="btnSaveApiKey">Save API Key</button>
@@ -904,7 +921,7 @@ const App = {
             html += `
                 <div class="alert alert-warning">
                     <strong>Demo Mode:</strong> No API key configured. Showing sample extracted data.
-                    Go to Settings to add your Claude API key for real extraction.
+                    Go to Settings to add your LLM API key for real extraction.
                 </div>
             `;
         }
@@ -1174,9 +1191,17 @@ const App = {
 
     // Save API key
     saveApiKey: function() {
-        const apiKey = document.getElementById('apiKey').value.trim();
-        Extraction.setApiKey(apiKey);
-        this.showAlert('API key saved', 'success');
+        const provider = document.getElementById('provider')?.value || 'claude';
+        const model = document.getElementById('model')?.value.trim() || '';
+        const apiKeyClaude = document.getElementById('apiKeyClaude')?.value.trim() || '';
+        const apiKeyOpenAI = document.getElementById('apiKeyOpenAI')?.value.trim() || '';
+
+        Extraction.setProvider(provider);
+        if (model) Extraction.setModel(model);
+        if (apiKeyClaude) Extraction.setApiKey('claude', apiKeyClaude);
+        if (apiKeyOpenAI) Extraction.setApiKey('openai', apiKeyOpenAI);
+
+        this.showAlert('API settings saved', 'success');
     },
 
     // Delete current client
