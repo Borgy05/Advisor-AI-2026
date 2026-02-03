@@ -114,7 +114,7 @@ const BatchProcessor = {
                             { role: 'system', content: systemPrompt },
                             { role: 'user', content: transcriptText.substring(0, 3000) }
                         ],
-                        response_format: { type: 'json_object' },
+                        text: { format: 'json' },
                         max_output_tokens: 512
                     })
                     : JSON.stringify({
@@ -131,7 +131,7 @@ const BatchProcessor = {
 
             const data = await response.json();
             let jsonStr = provider === 'openai'
-                ? (data.output?.[0]?.content?.[0]?.text || '').trim()
+                ? (data.output_text || data.output?.[0]?.content?.[0]?.text || '').trim()
                 : (data.content?.[0]?.text || '').trim();
             const jsonMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
             if (jsonMatch) jsonStr = jsonMatch[1].trim();

@@ -101,7 +101,7 @@ const Extraction = {
                             { role: 'system', content: systemPrompt },
                             { role: 'user', content: userPrompt }
                         ],
-                        response_format: { type: 'json_object' },
+                        text: { format: 'json' },
                         max_output_tokens: 4096
                     })
                     : JSON.stringify({
@@ -121,7 +121,7 @@ const Extraction = {
 
             const data = await response.json();
             const extractedText = provider === this.PROVIDERS.OPENAI
-                ? (data.output?.[0]?.content?.[0]?.text || '')
+                ? (data.output_text || data.output?.[0]?.content?.[0]?.text || '')
                 : (data.content?.[0]?.text || '');
 
             // Parse the JSON response
@@ -194,7 +194,7 @@ ${transcriptText}
                         { role: 'system', content: systemPrompt },
                         { role: 'user', content: userPrompt }
                     ],
-                    response_format: { type: 'json_object' },
+                    text: { format: 'json' },
                     max_output_tokens: 4096
                 })
                 : JSON.stringify({
@@ -213,7 +213,7 @@ ${transcriptText}
 
         const data = await response.json();
         const extractedText = provider === this.PROVIDERS.OPENAI
-            ? (data.output?.[0]?.content?.[0]?.text || '')
+            ? (data.output_text || data.output?.[0]?.content?.[0]?.text || '')
             : (data.content?.[0]?.text || '');
         return this.parseExtractionResponse(extractedText);
     },
