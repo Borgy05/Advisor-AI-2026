@@ -50,6 +50,14 @@ const App = {
             });
         }
 
+        // Settings button (available before any client)
+        const btnSettings = document.getElementById('btnOpenSettings');
+        if (btnSettings) {
+            btnSettings.addEventListener('click', () => {
+                this.showSettingsView();
+            });
+        }
+
         // Batch file input
         const batchInput = document.getElementById('batchTranscriptFiles');
         if (batchInput) {
@@ -1532,6 +1540,32 @@ const App = {
                 this.showAlert('Please drop .txt transcript files', 'warning');
             }
         });
+    },
+
+    // Show settings view without selecting a client
+    showSettingsView: function() {
+        this.currentClientId = null;
+        this.currentClient = null;
+
+        // Clear active state in sidebar
+        document.querySelectorAll('.client-list-item').forEach(item => {
+            item.classList.remove('active');
+        });
+
+        const mainContent = document.getElementById('mainContent');
+        mainContent.innerHTML = `
+            <div class="content-header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button class="btn btn-secondary btn-sm" onclick="App.showClientListView()">&#8592; Client List</button>
+                    <h2>Settings</h2>
+                </div>
+            </div>
+            <div class="content-body">
+                ${this.renderSettingsTab()}
+            </div>
+        `;
+
+        this.attachSettingsListeners();
     },
 
     // Show welcome state
