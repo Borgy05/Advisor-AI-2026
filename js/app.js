@@ -1019,6 +1019,9 @@ const App = {
                 ? JSON.stringify(value.value)
                 : value.value;
 
+            const quote = value.sourceQuote ? this.escapeHtml(String(value.sourceQuote)) : '';
+            const quoteHtml = quote ? `<div class="extraction-quote">“${quote}”</div>` : '';
+
             return `
                 <div class="extraction-field">
                     <input type="checkbox" class="extraction-checkbox"
@@ -1035,6 +1038,7 @@ const App = {
                                 ${Math.round(confidence * 100)}%
                             </span>
                         </div>
+                        ${quoteHtml}
                         ${isConflict ? `
                             <div style="font-size: 0.75rem; color: var(--danger-color); margin-top: 4px;">
                                 Existing: ${conflicts.find(c => c.field === path).existingValue}

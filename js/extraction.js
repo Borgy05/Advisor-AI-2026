@@ -158,18 +158,18 @@ const Extraction = {
         const systemPrompt = this.buildSystemPrompt();
         const userPrompt = `Extract ONLY financial assets and liabilities from the transcript.
 
-Return JSON object:
+Return JSON object (each value must include confidence and sourceQuote):
 {
   "extractedData": {
-    "bankAccounts": [ { "bank": { "value": "...", "confidence": 0.9 }, "balance": { "value": 1234, "confidence": 0.8 }, "currency": { "value": "GBP", "confidence": 0.9 } } ],
-    "investments": [ { "provider": { "value": "...", "confidence": 0.9 }, "currentValue": { "value": 1234, "confidence": 0.8 }, "currency": { "value": "GBP", "confidence": 0.9 }, "type": { "value": "...", "confidence": 0.7 } } ],
-    "pensions": [ { "provider": { "value": "...", "confidence": 0.9 }, "currentValue": { "value": 1234, "confidence": 0.8 }, "currency": { "value": "GBP", "confidence": 0.9 }, "type": { "value": "...", "confidence": 0.7 } } ],
-    "properties": [ { "address": { "line1": { "value": "...", "confidence": 0.7 }, "city": { "value": "...", "confidence": 0.8 }, "country": { "value": "...", "confidence": 0.8 } }, "currentValue": { "value": 1234, "confidence": 0.8 }, "currency": { "value": "GBP", "confidence": 0.9 }, "mortgageBalance": { "value": 1000, "confidence": 0.8 } } ],
-    "debts": [ { "provider": { "value": "...", "confidence": 0.9 }, "outstandingBalance": { "value": 1234, "confidence": 0.8 }, "currency": { "value": "GBP", "confidence": 0.9 }, "type": { "value": "...", "confidence": 0.7 } } ]
+    "bankAccounts": [ { "bank": { "value": "...", "confidence": 0.9, "sourceQuote": "..." }, "balance": { "value": 1234, "confidence": 0.8, "sourceQuote": "..." }, "currency": { "value": "GBP", "confidence": 0.9, "sourceQuote": "..." } } ],
+    "investments": [ { "provider": { "value": "...", "confidence": 0.9, "sourceQuote": "..." }, "currentValue": { "value": 1234, "confidence": 0.8, "sourceQuote": "..." }, "currency": { "value": "GBP", "confidence": 0.9, "sourceQuote": "..." }, "type": { "value": "...", "confidence": 0.7, "sourceQuote": "..." } } ],
+    "pensions": [ { "provider": { "value": "...", "confidence": 0.9, "sourceQuote": "..." }, "currentValue": { "value": 1234, "confidence": 0.8, "sourceQuote": "..." }, "currency": { "value": "GBP", "confidence": 0.9, "sourceQuote": "..." }, "type": { "value": "...", "confidence": 0.7, "sourceQuote": "..." } } ],
+    "properties": [ { "address": { "line1": { "value": "...", "confidence": 0.7, "sourceQuote": "..." }, "city": { "value": "...", "confidence": 0.8, "sourceQuote": "..." }, "country": { "value": "...", "confidence": 0.8, "sourceQuote": "..." } }, "currentValue": { "value": 1234, "confidence": 0.8, "sourceQuote": "..." }, "currency": { "value": "GBP", "confidence": 0.9, "sourceQuote": "..." }, "mortgageBalance": { "value": 1000, "confidence": 0.8, "sourceQuote": "..." } } ],
+    "debts": [ { "provider": { "value": "...", "confidence": 0.9, "sourceQuote": "..." }, "outstandingBalance": { "value": 1234, "confidence": 0.8, "sourceQuote": "..." }, "currency": { "value": "GBP", "confidence": 0.9, "sourceQuote": "..." }, "type": { "value": "...", "confidence": 0.7, "sourceQuote": "..." } } ]
   }
 }
 
-Return ONLY the JSON. Use null and confidence 0 if not mentioned.
+Return ONLY the JSON. Use null, confidence 0, and sourceQuote "" if not mentioned.
 
 TRANSCRIPT:
 ---
@@ -253,6 +253,7 @@ IMPORTANT RULES:
 7. Convert dates to ISO format (YYYY-MM-DD) where possible
 8. For age, calculate from DOB if DOB is given but age is not stated
 9. CRITICAL: Capture ALL financial assets and liabilities mentioned, including bank accounts, cash, investments, pensions, properties, and debts.
+10. CRITICAL: For every extracted field include a short verbatim sourceQuote from the transcript (5-25 words).
 
 Respond ONLY with a valid JSON object in the exact format specified. Do not include any explanation or markdown.`;
     },
@@ -265,58 +266,58 @@ Return a JSON object with this structure (fill ALL financial assets/liabilities 
 {
     "extractedData": {
         "personal": {
-            "firstName": { "value": "...", "confidence": 0.95 },
-            "lastName": { "value": "...", "confidence": 0.95 },
-            "dateOfBirth": { "value": "YYYY-MM-DD", "confidence": 0.9 },
-            "age": { "value": 55, "confidence": 0.95 },
-            "email": { "value": "...", "confidence": 0.8 },
-            "phoneMobile": { "value": "...", "confidence": 0.8 },
-            "countryOfResidence": { "value": "...", "confidence": 0.9 },
-            "nationality": { "value": "...", "confidence": 0.85 },
-            "relationshipStatus": { "value": "...", "confidence": 0.9 },
+            "firstName": { "value": "...", "confidence": 0.95, "sourceQuote": "..." },
+            "lastName": { "value": "...", "confidence": 0.95, "sourceQuote": "..." },
+            "dateOfBirth": { "value": "YYYY-MM-DD", "confidence": 0.9, "sourceQuote": "..." },
+            "age": { "value": 55, "confidence": 0.95, "sourceQuote": "..." },
+            "email": { "value": "...", "confidence": 0.8, "sourceQuote": "..." },
+            "phoneMobile": { "value": "...", "confidence": 0.8, "sourceQuote": "..." },
+            "countryOfResidence": { "value": "...", "confidence": 0.9, "sourceQuote": "..." },
+            "nationality": { "value": "...", "confidence": 0.85, "sourceQuote": "..." },
+            "relationshipStatus": { "value": "...", "confidence": 0.9, "sourceQuote": "..." },
             "address": {
-                "city": { "value": "...", "confidence": 0.8 },
-                "country": { "value": "...", "confidence": 0.9 }
+                "city": { "value": "...", "confidence": 0.8, "sourceQuote": "..." },
+                "country": { "value": "...", "confidence": 0.9, "sourceQuote": "..." }
             }
         },
         "employment": {
-            "status": { "value": "Employed", "confidence": 0.95 },
-            "jobTitle": { "value": "...", "confidence": 0.9 },
-            "employer": { "value": "...", "confidence": 0.95 },
-            "monthlyGrossIncome": { "value": 22500, "confidence": 0.9 },
-            "incomeCurrency": { "value": "USD", "confidence": 0.85 },
-            "retirementAge": { "value": 65, "confidence": 0.9 }
+            "status": { "value": "Employed", "confidence": 0.95, "sourceQuote": "..." },
+            "jobTitle": { "value": "...", "confidence": 0.9, "sourceQuote": "..." },
+            "employer": { "value": "...", "confidence": 0.95, "sourceQuote": "..." },
+            "monthlyGrossIncome": { "value": 22500, "confidence": 0.9, "sourceQuote": "..." },
+            "incomeCurrency": { "value": "USD", "confidence": 0.85, "sourceQuote": "..." },
+            "retirementAge": { "value": 65, "confidence": 0.9, "sourceQuote": "..." }
         },
         "goals": {
-            "shortTerm": { "value": "...", "confidence": 0.8 },
-            "mediumTerm": { "value": "...", "confidence": 0.7 },
-            "longTerm": { "value": "...", "confidence": 0.85 },
-            "retirementAge": { "value": 65, "confidence": 0.9 },
-            "retirementLocation": { "value": "...", "confidence": 0.8 }
+            "shortTerm": { "value": "...", "confidence": 0.8, "sourceQuote": "..." },
+            "mediumTerm": { "value": "...", "confidence": 0.7, "sourceQuote": "..." },
+            "longTerm": { "value": "...", "confidence": 0.85, "sourceQuote": "..." },
+            "retirementAge": { "value": 65, "confidence": 0.9, "sourceQuote": "..." },
+            "retirementLocation": { "value": "...", "confidence": 0.8, "sourceQuote": "..." }
         },
         "children": [
             {
-                "inEducation": { "value": true, "confidence": 0.8 },
-                "school": { "value": "University", "confidence": 0.7 }
+                "inEducation": { "value": true, "confidence": 0.8, "sourceQuote": "..." },
+                "school": { "value": "University", "confidence": 0.7, "sourceQuote": "..." }
             }
         ],
         "pensions": [
             {
-                "type": { "value": "Superannuation", "confidence": 0.9 },
-                "currentValue": { "value": 320000, "confidence": 0.85 },
-                "currency": { "value": "AUD", "confidence": 0.9 },
-                "annualGrowthRate": { "value": 6.5, "confidence": 0.7 }
+                "type": { "value": "Superannuation", "confidence": 0.9, "sourceQuote": "..." },
+                "currentValue": { "value": 320000, "confidence": 0.85, "sourceQuote": "..." },
+                "currency": { "value": "AUD", "confidence": 0.9, "sourceQuote": "..." },
+                "annualGrowthRate": { "value": 6.5, "confidence": 0.7, "sourceQuote": "..." }
             }
         ],
         "properties": [
             {
                 "address": {
-                    "state": { "value": "Queensland", "confidence": 0.9 },
-                    "country": { "value": "Australia", "confidence": 0.95 }
+                    "state": { "value": "Queensland", "confidence": 0.9, "sourceQuote": "..." },
+                    "country": { "value": "Australia", "confidence": 0.95, "sourceQuote": "..." }
                 },
-                "currentValue": { "value": 1500000, "confidence": 0.9 },
-                "currency": { "value": "AUD", "confidence": 0.95 },
-                "mortgageBalance": { "value": 1100000, "confidence": 0.9 }
+                "currentValue": { "value": 1500000, "confidence": 0.9, "sourceQuote": "..." },
+                "currency": { "value": "AUD", "confidence": 0.95, "sourceQuote": "..." },
+                "mortgageBalance": { "value": 1100000, "confidence": 0.9, "sourceQuote": "..." }
             }
         ]
     },
@@ -324,7 +325,7 @@ Return a JSON object with this structure (fill ALL financial assets/liabilities 
     "missingCriticalFields": ["list", "of", "important", "missing", "fields"]
 }
 
-For any field not mentioned in the transcript, set value to null and confidence to 0.
+For any field not mentioned in the transcript, set value to null, confidence to 0, and sourceQuote to "".
 
 `;
 
@@ -526,50 +527,50 @@ Extract all available information and return ONLY the JSON object.`;
             success: true,
             data: {
                 personal: {
-                    firstName: { value: 'Simon', confidence: 0.95 },
-                    lastName: { value: 'Shaw', confidence: 0.95 },
-                    dateOfBirth: { value: '1970-04-16', confidence: 0.9 },
-                    age: { value: 55, confidence: 0.95 },
-                    countryOfResidence: { value: 'Saudi Arabia', confidence: 0.9 },
-                    nationality: { value: 'Australian', confidence: 0.85 },
-                    relationshipStatus: { value: 'Divorced', confidence: 0.9 }
+                    firstName: { value: 'Simon', confidence: 0.95, sourceQuote: 'My name is Simon Shaw.' },
+                    lastName: { value: 'Shaw', confidence: 0.95, sourceQuote: 'My name is Simon Shaw.' },
+                    dateOfBirth: { value: '1970-04-16', confidence: 0.9, sourceQuote: 'Born on 16 April 1970.' },
+                    age: { value: 55, confidence: 0.95, sourceQuote: 'I am 55 years old.' },
+                    countryOfResidence: { value: 'Saudi Arabia', confidence: 0.9, sourceQuote: 'I live in Saudi Arabia.' },
+                    nationality: { value: 'Australian', confidence: 0.85, sourceQuote: 'I am Australian.' },
+                    relationshipStatus: { value: 'Divorced', confidence: 0.9, sourceQuote: 'I am divorced.' }
                 },
                 employment: {
-                    status: { value: 'Employed', confidence: 0.95 },
-                    jobTitle: { value: 'Trojan Project', confidence: 0.7 },
-                    employer: { value: 'NEOM', confidence: 0.95 },
-                    monthlyGrossIncome: { value: 85000, confidence: 0.9 },
-                    incomeCurrency: { value: 'SAR', confidence: 0.95 },
-                    retirementAge: { value: 65, confidence: 0.9 }
+                    status: { value: 'Employed', confidence: 0.95, sourceQuote: 'I am employed.' },
+                    jobTitle: { value: 'Trojan Project', confidence: 0.7, sourceQuote: 'I work on the Trojan Project.' },
+                    employer: { value: 'NEOM', confidence: 0.95, sourceQuote: 'I work for NEOM.' },
+                    monthlyGrossIncome: { value: 85000, confidence: 0.9, sourceQuote: 'I earn 85,000 a month.' },
+                    incomeCurrency: { value: 'SAR', confidence: 0.95, sourceQuote: 'In Saudi Riyals.' },
+                    retirementAge: { value: 65, confidence: 0.9, sourceQuote: 'I want to retire at 65.' }
                 },
                 goals: {
-                    longTerm: { value: 'Retirement planning, tax-efficient savings', confidence: 0.85 },
-                    retirementAge: { value: 65, confidence: 0.9 },
-                    retirementLocation: { value: 'Australia', confidence: 0.85 }
+                    longTerm: { value: 'Retirement planning, tax-efficient savings', confidence: 0.85, sourceQuote: 'Retirement planning and tax-efficient savings.' },
+                    retirementAge: { value: 65, confidence: 0.9, sourceQuote: 'Retire at 65.' },
+                    retirementLocation: { value: 'Australia', confidence: 0.85, sourceQuote: 'We will return to Australia.' }
                 },
                 children: [
                     {
-                        inEducation: { value: true, confidence: 0.8 },
-                        school: { value: 'University in Australia', confidence: 0.75 }
+                        inEducation: { value: true, confidence: 0.8, sourceQuote: 'They are in education.' },
+                        school: { value: 'University in Australia', confidence: 0.75, sourceQuote: 'Studying at university in Australia.' }
                     }
                 ],
                 pensions: [
                     {
-                        type: { value: 'Superannuation', confidence: 0.9 },
-                        currentValue: { value: 320000, confidence: 0.85 },
-                        currency: { value: 'AUD', confidence: 0.9 },
-                        annualGrowthRate: { value: 6.5, confidence: 0.7 }
+                        type: { value: 'Superannuation', confidence: 0.9, sourceQuote: 'My superannuation.' },
+                        currentValue: { value: 320000, confidence: 0.85, sourceQuote: 'Around 320,000.' },
+                        currency: { value: 'AUD', confidence: 0.9, sourceQuote: 'Australian dollars.' },
+                        annualGrowthRate: { value: 6.5, confidence: 0.7, sourceQuote: 'Assume 6.5% growth.' }
                     }
                 ],
                 properties: [
                     {
                         address: {
-                            state: { value: 'Queensland', confidence: 0.9 },
-                            country: { value: 'Australia', confidence: 0.95 }
+                            state: { value: 'Queensland', confidence: 0.9, sourceQuote: 'In Queensland.' },
+                            country: { value: 'Australia', confidence: 0.95, sourceQuote: 'In Australia.' }
                         },
-                        currentValue: { value: 1500000, confidence: 0.9 },
-                        currency: { value: 'AUD', confidence: 0.95 },
-                        mortgageBalance: { value: 1100000, confidence: 0.9 }
+                        currentValue: { value: 1500000, confidence: 0.9, sourceQuote: 'Worth 1.5 million.' },
+                        currency: { value: 'AUD', confidence: 0.95, sourceQuote: 'Australian dollars.' },
+                        mortgageBalance: { value: 1100000, confidence: 0.9, sourceQuote: 'Mortgage of 1.1 million.' }
                     }
                 ]
             },
